@@ -448,12 +448,12 @@ section[data-testid="stSidebar"] .stMarkdown h3 {
     border-radius: 10px;
     padding: 14px 28px;
     font-weight: 800 !important;
-    font-size: 1.35rem !important;
+    font-size: 1.15rem !important;
 }
 .stTabs [data-baseweb="tab"] p,
 .stTabs [data-baseweb="tab"] span {
     font-weight: 800 !important;
-    font-size: 1.35rem !important;
+    font-size: 1.15rem !important;
 }
 
 /* ---- Compare Card ---- */
@@ -586,7 +586,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "&#128084;  Outfit",
     "&#9888;&#65039;  Alerts",
     "&#9992;&#65039;  Planner",
-    "&#128172;  SMS Log",
+    "&#128172;  SMS",
 ])
 
 
