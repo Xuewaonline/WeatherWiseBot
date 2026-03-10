@@ -735,7 +735,7 @@ with tab2:
             st.markdown(f"""
             <div class="outfit-hero">
                 <h3 style="margin-top:0;color:#64b5f6;font-weight:700">&#128084; Outfit Recommendation</h3>
-                <div class="outfit-section-title">Clothing Layers</div>
+                <div class="outfit-section-title">Clothing</div>
                 <div>{layers_html}</div>
                 <div class="outfit-section-title">Footwear</div>
                 <div><span class="outfit-item">&#128095; {rec['footwear']}</span></div>
