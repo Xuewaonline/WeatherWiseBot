@@ -623,6 +623,22 @@ with tab1:
             </div>
             """, unsafe_allow_html=True)
 
+            # Metrics
+            col1, col2, col3, col4 = st.columns(4)
+            for col, icon, val, label in [
+                (col1, "&#127777;&#65039;", f"{current['temperature']}&#176;C", "Temperature"),
+                (col2, "&#128167;", f"{current['humidity']}%", "Humidity"),
+                (col3, "&#127744;", f"{current['wind_speed']} m/s", "Wind"),
+                (col4, "&#128065;", f"{current['visibility']/1000:.1f} km", "Visibility"),
+            ]:
+                col.markdown(f"""
+                <div class="mini-metric">
+                    <div class="mini-metric-icon">{icon}</div>
+                    <div class="mini-metric-value">{val}</div>
+                    <div class="mini-metric-label">{label}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
             # 5-day forecast
             if "forecasts" in forecast:
                 st.markdown("")
