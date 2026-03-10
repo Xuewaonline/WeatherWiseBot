@@ -856,6 +856,8 @@ with tab4:
         with col4:
             event_time = st.time_input("Event Time", value=datetime.strptime("14:00", "%H:%M").time())
 
+        notify_before = st.selectbox("Notify Before", [12, 24, 48], index=1, format_func=lambda x: f"{x} hours")
+
         submitted = st.form_submit_button("Add Schedule Plan", type="primary", use_container_width=True)
         if submitted:
             event_desc = f"{event_type}: {origin} → {destination}"
@@ -863,7 +865,7 @@ with tab4:
                 event_type, event_desc, origin, destination,
                 event_date.strftime("%Y-%m-%d"),
                 event_time.strftime("%H:%M"),
-                24,
+                notify_before,
             )
             st.success(f"Event added: {event_desc}")
 
