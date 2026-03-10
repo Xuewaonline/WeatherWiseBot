@@ -16,17 +16,7 @@ from sms_service import send_daily_forecast_sms, send_severe_alert_sms, send_eve
 from scheduler_service import start_scheduler, stop_scheduler, job_daily_forecast, job_check_severe_weather
 from config import SUPPORTED_CITIES
 
-# --- Weather icon mapping ---
-WEATHER_ICONS = {
-    "clear sky": "sun_behind_cloud", "few clouds": "sun_behind_small_cloud",
-    "scattered clouds": "cloud", "broken clouds": "cloud",
-    "overcast clouds": "cloud", "shower rain": "cloud_with_rain",
-    "rain": "cloud_with_rain", "light rain": "cloud_with_rain",
-    "moderate rain": "cloud_with_rain", "heavy intensity rain": "cloud_with_rain",
-    "thunderstorm": "cloud_with_lightning_and_rain", "snow": "snowflake",
-    "mist": "fog", "haze": "fog", "fog": "fog",
-}
-
+# --- Weather emoji mapping ---
 WEATHER_EMOJI = {
     "clear sky": "&#9728;&#65039;", "few clouds": "&#9925;",
     "scattered clouds": "&#9729;&#65039;", "broken clouds": "&#9729;&#65039;",
@@ -45,16 +35,12 @@ def get_weather_emoji(desc):
     return "&#127780;&#65039;"
 
 def get_temp_color(temp):
-    if temp >= 35: return "#ff4444"
-    if temp >= 28: return "#ff8c00"
-    if temp >= 22: return "#ffd700"
-    if temp >= 15: return "#7ec8e3"
-    if temp >= 5:  return "#4a90d9"
-    return "#a0c4ff"
-
-def get_uv_bar(rain_chance):
-    color = "#4caf50" if rain_chance < 30 else "#ff9800" if rain_chance < 60 else "#f44336"
-    return f'<div style="background:#2a2a3e;border-radius:10px;height:8px;width:100%;margin:4px 0"><div style="background:{color};border-radius:10px;height:8px;width:{min(rain_chance, 100)}%"></div></div>'
+    if temp >= 35: return "#E53E3E"
+    if temp >= 28: return "#DD6B20"
+    if temp >= 22: return "#D69E2E"
+    if temp >= 15: return "#38A169"
+    if temp >= 5:  return "#3182CE"
+    return "#805AD5"
 
 
 # --- Page Config ---
@@ -65,400 +51,375 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# --- Global CSS ---
+# --- Light Theme CSS ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
 * { font-family: 'Inter', sans-serif; }
 
-/* ---- Header ---- */
+/* ---- Hero Header ---- */
 .hero-container {
-    background: linear-gradient(135deg, #0f0c29 0%, #1a1a4e 30%, #302b63 60%, #24243e 100%);
-    border-radius: 24px;
-    padding: 40px 40px 35px 40px;
-    margin-bottom: 25px;
+    background: linear-gradient(135deg, #EBF4FF 0%, #E0ECFB 40%, #F0F7FF 100%);
+    border: 1px solid #D0E1F9;
+    border-radius: 20px;
+    padding: 36px 40px 32px 40px;
+    margin-bottom: 24px;
     position: relative;
     overflow: hidden;
 }
 .hero-container::before {
     content: '';
     position: absolute;
-    top: -50%;
-    right: -15%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(66,165,245,0.12) 0%, transparent 70%);
+    top: -40%;
+    right: -10%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(74,144,217,0.08) 0%, transparent 70%);
     border-radius: 50%;
 }
-
-/* ---- Mascot ---- */
-.hero-mascot {
-    position: relative;
-    width: 90px;
-    height: 90px;
-    flex-shrink: 0;
-    animation: mascotBounce 2s ease-in-out infinite;
-}
-.mascot-cloud {
-    font-size: 5rem;
-    line-height: 1;
-    filter: drop-shadow(0 4px 12px rgba(66,165,245,0.4));
-}
-.mascot-face {
-    position: absolute;
-    bottom: -2px;
-    right: -4px;
-    font-size: 1.8rem;
-    animation: wiggle 3s ease-in-out infinite;
-}
-@keyframes mascotBounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-}
-@keyframes wiggle {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(6deg); }
-    75% { transform: rotate(-6deg); }
-}
-
-/* ---- Floating doodles ---- */
-.hero-weather-doodles {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 200px;
-    height: 100%;
-    pointer-events: none;
-}
-.doodle {
-    position: absolute;
-    opacity: 0.18;
-    animation: floatUp 6s ease-in-out infinite;
-}
-.d1 { font-size: 2rem; top: 15%; right: 20%; animation-delay: 0s; }
-.d2 { font-size: 2.4rem; top: 50%; right: 60%; animation-delay: 1.2s; }
-.d3 { font-size: 1.6rem; top: 70%; right: 15%; animation-delay: 2.5s; }
-.d4 { font-size: 1.8rem; top: 10%; right: 55%; animation-delay: 3.8s; }
-.d5 { font-size: 2.2rem; top: 55%; right: 35%; animation-delay: 0.8s; }
-@keyframes floatUp {
-    0%, 100% { transform: translateY(0) scale(1); opacity: 0.18; }
-    50% { transform: translateY(-12px) scale(1.1); opacity: 0.3; }
-}
-
-.hero-title {
-    font-size: 3.2rem;
+.hero-logo {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #4A90D9, #5BA3EC);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    color: white;
     font-weight: 800;
-    background: linear-gradient(90deg, #64b5f6, #42a5f5, #1e88e5, #90caf9, #64b5f6);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 3s ease infinite;
-    margin: 0;
-    letter-spacing: -1px;
+    flex-shrink: 0;
+    animation: logoBounce 2.5s ease-in-out infinite;
+    box-shadow: 0 4px 16px rgba(74,144,217,0.25);
 }
-@keyframes shimmer {
-    0% { background-position: 0% center; }
-    50% { background-position: 100% center; }
-    100% { background-position: 0% center; }
+@keyframes logoBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+.hero-title {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #1A365D;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+.hero-title span {
+    color: #4A90D9;
 }
 .hero-sub {
-    font-size: 1.1rem;
-    color: rgba(255,255,255,0.55);
-    margin-top: 6px;
+    font-size: 1rem;
+    color: #718096;
+    margin-top: 4px;
     font-weight: 400;
-    letter-spacing: 0.3px;
+}
+
+/* floating weather icons */
+.hero-floats {
+    position: absolute;
+    top: 0; right: 0;
+    width: 180px; height: 100%;
+    pointer-events: none;
+}
+.hf { position: absolute; opacity: 0.12; animation: hfFloat 5s ease-in-out infinite; }
+.hf1 { font-size: 1.8rem; top: 12%; right: 25%; animation-delay: 0s; }
+.hf2 { font-size: 2rem; top: 55%; right: 50%; animation-delay: 1.5s; }
+.hf3 { font-size: 1.5rem; top: 65%; right: 10%; animation-delay: 3s; }
+.hf4 { font-size: 1.6rem; top: 10%; right: 60%; animation-delay: 2s; }
+@keyframes hfFloat {
+    0%, 100% { transform: translateY(0); opacity: 0.12; }
+    50% { transform: translateY(-10px); opacity: 0.22; }
 }
 
 /* ---- Cards ---- */
-.glass-card {
-    background: rgba(255,255,255,0.03);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.08);
+.card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
     border-radius: 16px;
     padding: 24px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.glass-card:hover {
+.card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.06);
 }
+
+/* Weather Hero Card */
 .weather-hero-card {
-    background: linear-gradient(135deg, #1a237e 0%, #283593 40%, #1565c0 100%);
+    background: linear-gradient(135deg, #4A90D9 0%, #5BA3EC 50%, #6DB3F8 100%);
     border-radius: 20px;
-    padding: 35px;
+    padding: 32px;
     color: white;
     position: relative;
     overflow: hidden;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 .weather-hero-card::after {
     content: '';
     position: absolute;
-    top: -30%;
-    right: -10%;
-    width: 250px;
-    height: 250px;
-    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    top: -30%; right: -10%;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
     border-radius: 50%;
 }
 .weather-temp-big {
-    font-size: 4.5rem;
+    font-size: 4rem;
     font-weight: 800;
     letter-spacing: -3px;
     line-height: 1;
-    margin: 10px 0;
+    margin: 8px 0;
 }
-.weather-desc {
-    font-size: 1.2rem;
-    font-weight: 400;
-    opacity: 0.85;
-    text-transform: capitalize;
-}
-.weather-detail {
+.weather-city-name { font-size: 1.4rem; font-weight: 600; margin-bottom: 0; }
+.weather-desc { font-size: 1.1rem; opacity: 0.9; text-transform: capitalize; }
+.weather-pill {
     display: inline-block;
-    background: rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 8px 16px;
-    margin: 4px;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-.weather-city-name {
-    font-size: 1.5rem;
-    font-weight: 600;
-    letter-spacing: -0.5px;
-    margin-bottom: 0;
-}
-
-/* ---- Forecast Day Card ---- */
-.forecast-day {
-    background: linear-gradient(180deg, rgba(30,60,114,0.6) 0%, rgba(42,82,152,0.4) 100%);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 20px 16px;
-    text-align: center;
-    color: white;
-    transition: transform 0.2s;
-}
-.forecast-day:hover { transform: translateY(-3px); }
-.forecast-day-name { font-size: 0.8rem; font-weight: 600; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
-.forecast-emoji { font-size: 2rem; margin: 8px 0; }
-.forecast-temp-high { font-size: 1.4rem; font-weight: 700; }
-.forecast-temp-low { font-size: 0.9rem; opacity: 0.6; }
-.forecast-rain { font-size: 0.75rem; opacity: 0.5; margin-top: 4px; }
-
-/* ---- Outfit Card ---- */
-.outfit-hero {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px;
-    padding: 30px;
-    color: white;
-}
-.outfit-section-title {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 8px;
-    margin-top: 18px;
-}
-.outfit-item {
-    display: inline-block;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.2);
     border-radius: 10px;
-    padding: 8px 16px;
-    margin: 4px;
-    font-size: 0.9rem;
+    padding: 6px 14px;
+    margin: 3px;
+    font-size: 0.82rem;
     font-weight: 500;
-    color: white;
-}
-.outfit-note {
-    background: rgba(255,152,0,0.1);
-    border-left: 3px solid #ff9800;
-    border-radius: 0 8px 8px 0;
-    padding: 10px 14px;
-    margin-top: 12px;
-    font-size: 0.85rem;
-    color: #ffcc80;
 }
 
-/* ---- Alert Card ---- */
-.alert-hero {
-    background: linear-gradient(135deg, #b71c1c 0%, #d32f2f 50%, #c62828 100%);
+/* Forecast Day Card */
+.forecast-day {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 18px 14px;
+    text-align: center;
+    color: #2D3748;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.forecast-day:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.fd-name { font-size: 0.75rem; font-weight: 600; color: #A0AEC0; text-transform: uppercase; letter-spacing: 1px; }
+.fd-emoji { font-size: 2rem; margin: 8px 0; }
+.fd-high { font-size: 1.3rem; font-weight: 700; color: #2D3748; }
+.fd-low { font-size: 0.85rem; color: #A0AEC0; }
+.fd-rain { font-size: 0.72rem; color: #4A90D9; margin-top: 4px; font-weight: 500; }
+
+/* Mini Metric */
+.mini-metric {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+}
+.mm-icon { font-size: 1.4rem; margin-bottom: 4px; }
+.mm-value { font-size: 1.5rem; font-weight: 700; color: #2D3748; }
+.mm-label { font-size: 0.68rem; color: #A0AEC0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+/* Compare Card */
+.compare-card {
+    background: linear-gradient(135deg, #4A90D9 0%, #5BA3EC 100%);
     border-radius: 16px;
     padding: 24px;
     color: white;
-    margin-bottom: 12px;
-    position: relative;
-    overflow: hidden;
+    text-align: center;
 }
-.alert-hero::before {
-    content: '&#9888;&#65039;';
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 2rem;
-    opacity: 0.2;
+
+/* Outfit Card */
+.outfit-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 18px;
+    padding: 28px;
+    color: #2D3748;
 }
-.alert-hero h4 { margin: 0 0 8px 0; font-weight: 700; font-size: 1.1rem; }
-.alert-hero p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
-.alert-severity {
+.outfit-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #A0AEC0;
+    margin-bottom: 8px;
+    margin-top: 16px;
+}
+.outfit-tag {
     display: inline-block;
-    background: rgba(255,255,255,0.2);
+    background: #EBF4FF;
+    border: 1px solid #D0E1F9;
+    border-radius: 8px;
+    padding: 7px 14px;
+    margin: 3px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #2B6CB0;
+}
+.outfit-note {
+    background: #FFFAF0;
+    border-left: 3px solid #ED8936;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-size: 0.83rem;
+    color: #C05621;
+}
+
+/* Alert Cards */
+.alert-danger {
+    background: linear-gradient(135deg, #FEB2B2 0%, #FC8181 100%);
+    border: 1px solid #FEB2B2;
+    border-radius: 14px;
+    padding: 22px;
+    color: #742A2A;
+    margin-bottom: 12px;
+}
+.alert-danger h4 { margin: 0 0 6px 0; font-weight: 700; font-size: 1.05rem; }
+.alert-danger p { margin: 0; font-size: 0.88rem; }
+.alert-sev {
+    display: inline-block;
+    background: rgba(116,42,42,0.15);
     border-radius: 6px;
     padding: 3px 10px;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-top: 8px;
+    color: #9B2C2C;
 }
-
-.alert-safe {
-    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
-    border-radius: 16px;
+.alert-ok {
+    background: linear-gradient(135deg, #C6F6D5 0%, #9AE6B4 100%);
+    border: 1px solid #9AE6B4;
+    border-radius: 14px;
     padding: 24px;
-    color: white;
+    color: #22543D;
     text-align: center;
 }
 
-/* ---- SMS Preview ---- */
+/* SMS Phone Mockup */
 .sms-phone {
-    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-    border: 2px solid rgba(255,255,255,0.1);
-    border-radius: 24px;
-    padding: 20px;
+    background: #FFFFFF;
+    border: 2px solid #E2E8F0;
+    border-radius: 22px;
+    padding: 18px;
     max-width: 380px;
     margin: 10px auto;
 }
-.sms-phone-header {
+.sms-header {
     text-align: center;
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 12px;
+    font-size: 0.72rem;
+    color: #A0AEC0;
+    margin-bottom: 10px;
     font-weight: 500;
 }
 .sms-bubble {
-    background: rgba(66,165,245,0.15);
-    border: 1px solid rgba(66,165,245,0.2);
+    background: #EBF4FF;
+    border: 1px solid #D0E1F9;
     border-radius: 14px 14px 4px 14px;
     padding: 14px 16px;
-    color: rgba(255,255,255,0.9);
+    color: #2D3748;
     font-size: 0.82rem;
-    line-height: 1.5;
+    line-height: 1.55;
     white-space: pre-wrap;
     word-wrap: break-word;
 }
 
-/* ---- Event Card ---- */
-.event-item {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
+/* Event Item */
+.ev-item {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
     border-radius: 14px;
-    padding: 18px 20px;
+    padding: 16px 20px;
     margin-bottom: 10px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
 }
-.event-icon {
-    background: linear-gradient(135deg, #1e88e5, #42a5f5);
+.ev-icon {
+    background: linear-gradient(135deg, #4A90D9, #5BA3EC);
     border-radius: 12px;
-    width: 48px;
-    height: 48px;
+    width: 46px; height: 46px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     flex-shrink: 0;
 }
-.event-info { flex: 1; }
-.event-info h4 { margin: 0; font-size: 1rem; font-weight: 600; color: white; }
-.event-info p { margin: 2px 0 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.5); }
-.event-badge-pending {
-    background: rgba(255,152,0,0.15);
-    color: #ffb74d;
+.ev-body { flex: 1; }
+.ev-body h4 { margin: 0; font-size: 0.95rem; font-weight: 600; color: #2D3748; }
+.ev-body p { margin: 2px 0 0 0; font-size: 0.78rem; color: #A0AEC0; }
+.badge-pending {
+    background: #FEFCBF;
+    color: #975A16;
     padding: 4px 12px;
     border-radius: 20px;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
+    border: 1px solid #F6E05E;
 }
-.event-badge-done {
-    background: rgba(76,175,80,0.15);
-    color: #81c784;
+.badge-done {
+    background: #C6F6D5;
+    color: #276749;
     padding: 4px 12px;
     border-radius: 20px;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
+    border: 1px solid #9AE6B4;
 }
 
-/* ---- Metric Mini Card ---- */
-.mini-metric {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    padding: 18px;
-    text-align: center;
+/* Monitor Bar */
+.monitor-bar {
+    background: #EBF4FF;
+    border: 1px solid #D0E1F9;
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
 }
-.mini-metric-icon { font-size: 1.5rem; margin-bottom: 6px; }
-.mini-metric-value { font-size: 1.6rem; font-weight: 700; color: white; }
-.mini-metric-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.monitor-bar p { margin: 0; }
 
-/* ---- Sidebar ---- */
+/* Sidebar */
 section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0f0c29 0%, #1a1a2e 100%);
+    background: #F0F4FA;
 }
 section[data-testid="stSidebar"] .stMarkdown h3 {
-    color: rgba(255,255,255,0.7);
-    font-size: 0.8rem;
+    color: #4A5568;
+    font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     font-weight: 600;
 }
 
-/* ---- Tabs ---- */
+/* Tabs */
 .stTabs [data-baseweb="tab-list"] {
     gap: 4px;
-    background: rgba(255,255,255,0.02);
+    background: #EDF2F7;
     border-radius: 12px;
     padding: 4px;
 }
 .stTabs [data-baseweb="tab"] {
     border-radius: 10px;
-    padding: 10px 20px;
+    padding: 10px 18px;
     font-weight: 500;
     font-size: 0.85rem;
 }
 
-/* ---- Compare Card ---- */
-.compare-card {
-    background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
-    border-radius: 16px;
-    padding: 24px;
-    color: white;
-    text-align: center;
-}
-.compare-vs {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin: 8px 0;
-}
-
-/* ---- Footer ---- */
+/* Footer */
 .footer {
     text-align: center;
-    padding: 20px 0 10px 0;
-    color: rgba(255,255,255,0.2);
+    padding: 24px 0 12px 0;
+    color: #A0AEC0;
     font-size: 0.72rem;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
+}
+
+/* History Item */
+.hist-item {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 10px 16px;
+    margin-bottom: 6px;
+    font-size: 0.82rem;
+    color: #4A5568;
 }
 
 /* Hide Streamlit defaults */
@@ -480,10 +441,10 @@ if "scheduler_running" not in st.session_state:
 with st.sidebar:
     st.markdown("")
     st.markdown("""
-    <div style="text-align:center;margin-bottom:20px">
-        <div style="font-size:3.5rem;margin-bottom:2px;animation: mascotBounce 2s ease-in-out infinite">&#9925;</div>
-        <div style="font-size:1.2rem;font-weight:800;color:#64b5f6;letter-spacing:-0.5px">WeatherWiseBot</div>
-        <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:2px">&#9889; Your Smart Weather Buddy</div>
+    <div style="text-align:center;margin-bottom:24px">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,#4A90D9,#5BA3EC);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:1.8rem;color:white;font-weight:800;box-shadow:0 4px 14px rgba(74,144,217,0.3);animation:logoBounce 2.5s ease-in-out infinite">W</div>
+        <div style="font-size:1.15rem;font-weight:700;color:#1A365D;margin-top:10px;letter-spacing:-0.3px">WeatherWiseBot</div>
+        <div style="font-size:0.72rem;color:#A0AEC0;margin-top:2px">Your Smart Weather Buddy</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -495,13 +456,11 @@ with st.sidebar:
     phone = st.text_input("Phone Number (E.164)", value=settings["phone_number"] if settings else "+85200000000")
 
     primary_city = st.selectbox(
-        "Primary City",
-        city_list,
+        "Primary City", city_list,
         index=city_list.index(settings["primary_city"]) if settings and settings["primary_city"] in city_list else 0,
     )
     secondary_city = st.selectbox(
-        "Secondary City (optional)",
-        [""] + city_list,
+        "Secondary City (optional)", [""] + city_list,
         index=(city_list.index(settings["secondary_city"]) + 1) if settings and settings["secondary_city"] in city_list else 0,
     )
     notification_time = st.time_input(
@@ -533,41 +492,33 @@ with st.sidebar:
             st.session_state.scheduler_running = False
 
     if st.session_state.scheduler_running:
-        st.markdown('<div style="text-align:center;color:#4caf50;font-size:0.8rem;margin-top:8px">&#9679; Scheduler Running</div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align:center;color:#38A169;font-size:0.8rem;margin-top:8px">&#9679; Scheduler Running</div>', unsafe_allow_html=True)
     else:
-        st.markdown('<div style="text-align:center;color:rgba(255,255,255,0.3);font-size:0.8rem;margin-top:8px">&#9679; Scheduler Stopped</div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align:center;color:#CBD5E0;font-size:0.8rem;margin-top:8px">&#9679; Scheduler Stopped</div>', unsafe_allow_html=True)
 
 
 # --- Hero Header ---
 st.markdown("""
 <div class="hero-container">
-    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-        <div class="hero-mascot">
-            <div class="mascot-cloud">&#9925;</div>
-            <div class="mascot-face">&#128566;</div>
-        </div>
+    <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap">
+        <div class="hero-logo">W</div>
         <div>
-            <p class="hero-title">WeatherWiseBot</p>
-            <p class="hero-sub">Your smart weather buddy &#8212; forecasts, outfit tips & alerts!</p>
+            <p class="hero-title">Weather<span>Wise</span>Bot</p>
+            <p class="hero-sub">Your smart weather buddy &mdash; forecasts, outfit tips & alerts</p>
         </div>
-        <div class="hero-weather-doodles">
-            <span class="doodle d1">&#127782;&#65039;</span>
-            <span class="doodle d2">&#9728;&#65039;</span>
-            <span class="doodle d3">&#10052;&#65039;</span>
-            <span class="doodle d4">&#9889;</span>
-            <span class="doodle d5">&#127752;</span>
-        </div>
+    </div>
+    <div class="hero-floats">
+        <span class="hf hf1">&#127782;&#65039;</span>
+        <span class="hf hf2">&#9728;&#65039;</span>
+        <span class="hf hf3">&#10052;&#65039;</span>
+        <span class="hf hf4">&#127752;</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Main Tabs ---
+# --- Tabs ---
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "&#127780;&#65039;  Weather",
-    "&#128084;  Outfit",
-    "&#9888;&#65039;  Alerts",
-    "&#9992;&#65039;  Planner",
-    "&#128172;  SMS Log",
+    "Weather", "Outfit", "Alerts", "Planner", "SMS Log",
 ])
 
 
@@ -586,39 +537,36 @@ with tab1:
             emoji = get_weather_emoji(current['description'])
             temp_color = get_temp_color(current['temperature'])
 
-            # Hero weather card
             st.markdown(f"""
             <div class="weather-hero-card">
                 <p class="weather-city-name">{forecast_city}</p>
                 <p class="weather-desc">{emoji} {current['description'].title()}</p>
-                <p class="weather-temp-big" style="color:{temp_color}">{current['temperature']}&#176;C</p>
-                <p style="font-size:0.9rem;opacity:0.6;margin-top:-5px">Feels like {current['feels_like']}&#176;C</p>
-                <div style="margin-top:16px">
-                    <span class="weather-detail">&#128167; {current['humidity']}%</span>
-                    <span class="weather-detail">&#127744; {current['wind_speed']} m/s</span>
-                    <span class="weather-detail">&#9729;&#65039; {current['clouds']}%</span>
-                    <span class="weather-detail">&#128065; {current['visibility']/1000:.1f} km</span>
+                <p class="weather-temp-big" style="color:white">{current['temperature']}&#176;C</p>
+                <p style="font-size:0.88rem;opacity:0.75;margin-top:-4px">Feels like {current['feels_like']}&#176;C</p>
+                <div style="margin-top:14px">
+                    <span class="weather-pill">Humidity {current['humidity']}%</span>
+                    <span class="weather-pill">Wind {current['wind_speed']} m/s</span>
+                    <span class="weather-pill">Clouds {current['clouds']}%</span>
+                    <span class="weather-pill">Vis {current['visibility']/1000:.1f} km</span>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-            # Metrics
             col1, col2, col3, col4 = st.columns(4)
             for col, icon, val, label in [
-                (col1, "&#127777;&#65039;", f"{current['temperature']}&#176;C", "Temperature"),
+                (col1, "&#127777;&#65039;", f"{current['temperature']}&#176;", "Temperature"),
                 (col2, "&#128167;", f"{current['humidity']}%", "Humidity"),
                 (col3, "&#127744;", f"{current['wind_speed']} m/s", "Wind"),
                 (col4, "&#128065;", f"{current['visibility']/1000:.1f} km", "Visibility"),
             ]:
                 col.markdown(f"""
                 <div class="mini-metric">
-                    <div class="mini-metric-icon">{icon}</div>
-                    <div class="mini-metric-value">{val}</div>
-                    <div class="mini-metric-label">{label}</div>
+                    <div class="mm-icon">{icon}</div>
+                    <div class="mm-value">{val}</div>
+                    <div class="mm-label">{label}</div>
                 </div>
                 """, unsafe_allow_html=True)
 
-            # 5-day forecast
             if "forecasts" in forecast:
                 st.markdown("")
                 st.markdown("##### 5-Day Forecast")
@@ -637,15 +585,14 @@ with tab1:
                         day_name = datetime.strptime(d, "%Y-%m-%d").strftime("%a")
                         st.markdown(f"""
                         <div class="forecast-day">
-                            <div class="forecast-day-name">{day_name}<br/>{d[5:]}</div>
-                            <div class="forecast-emoji">{day_emoji}</div>
-                            <div class="forecast-temp-high">{max(temps):.0f}&#176;</div>
-                            <div class="forecast-temp-low">{min(temps):.0f}&#176;</div>
-                            <div class="forecast-rain">&#9730; {max(rain_chances):.0f}%</div>
+                            <div class="fd-name">{day_name}<br/>{d[5:]}</div>
+                            <div class="fd-emoji">{day_emoji}</div>
+                            <div class="fd-high">{max(temps):.0f}&#176;</div>
+                            <div class="fd-low">{min(temps):.0f}&#176;</div>
+                            <div class="fd-rain">Rain {max(rain_chances):.0f}%</div>
                         </div>
                         """, unsafe_allow_html=True)
 
-    # Compare
     st.markdown("")
     st.markdown("##### Compare Two Cities")
     cc1, cc2 = st.columns(2)
@@ -663,16 +610,15 @@ with tab1:
             col1, col2 = st.columns(2)
             for col, w, name in [(col1, w1, compare1), (col2, w2, compare2)]:
                 e = get_weather_emoji(w['description'])
-                tc = get_temp_color(w['temperature'])
                 col.markdown(f"""
                 <div class="compare-card">
-                    <p style="font-size:1.2rem;font-weight:600;margin:0">{name}</p>
-                    <p style="font-size:2rem;margin:0">{e}</p>
-                    <p style="font-size:2.5rem;font-weight:800;color:{tc};margin:5px 0">{w['temperature']}&#176;C</p>
-                    <p style="font-size:0.9rem;opacity:0.7;margin:0">{w['description'].title()}</p>
+                    <p style="font-size:1.15rem;font-weight:600;margin:0">{name}</p>
+                    <p style="font-size:2rem;margin:4px 0">{e}</p>
+                    <p style="font-size:2.4rem;font-weight:800;margin:4px 0">{w['temperature']}&#176;C</p>
+                    <p style="font-size:0.88rem;opacity:0.8;margin:0">{w['description'].title()}</p>
                     <div style="margin-top:10px">
-                        <span class="weather-detail">&#128167; {w['humidity']}%</span>
-                        <span class="weather-detail">&#127744; {w['wind_speed']} m/s</span>
+                        <span class="weather-pill">Humidity {w['humidity']}%</span>
+                        <span class="weather-pill">Wind {w['wind_speed']} m/s</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -695,41 +641,38 @@ with tab2:
             )
             emoji = get_weather_emoji(summary['description'])
 
-            # Weather summary strip
             st.markdown(f"""
-            <div class="weather-hero-card" style="padding:20px 30px">
-                <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-                    <div style="font-size:2.5rem">{emoji}</div>
+            <div class="weather-hero-card" style="padding:20px 28px">
+                <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+                    <div style="font-size:2.4rem">{emoji}</div>
                     <div>
-                        <p style="margin:0;font-size:1.3rem;font-weight:700">{outfit_city}</p>
-                        <p style="margin:0;opacity:0.6">{summary['description'].title()}</p>
+                        <p style="margin:0;font-size:1.2rem;font-weight:700">{outfit_city}</p>
+                        <p style="margin:0;opacity:0.75;font-size:0.9rem">{summary['description'].title()}</p>
                     </div>
                     <div style="margin-left:auto;text-align:right">
-                        <p style="margin:0;font-size:2rem;font-weight:800">{summary['current_temp']}&#176;C</p>
-                        <p style="margin:0;font-size:0.8rem;opacity:0.5">Rain {summary['rain_chance']}% | Wind {summary['wind_speed']} m/s</p>
+                        <p style="margin:0;font-size:1.8rem;font-weight:800">{summary['current_temp']}&#176;C</p>
+                        <p style="margin:0;font-size:0.78rem;opacity:0.65">Rain {summary['rain_chance']}% | Wind {summary['wind_speed']} m/s</p>
                     </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-            # Outfit card
-            layers_html = "".join(f'<span class="outfit-item">&#128085; {l}</span>' for l in rec['layers'])
-            acc_html = "".join(f'<span class="outfit-item">&#127890; {a}</span>' for a in rec['accessories']) if rec['accessories'] else ""
+            layers_html = "".join(f'<span class="outfit-tag">{l}</span>' for l in rec['layers'])
+            acc_html = "".join(f'<span class="outfit-tag">{a}</span>' for a in rec['accessories']) if rec['accessories'] else ""
             notes_html = "".join(f'<div class="outfit-note">{n}</div>' for n in rec['special_notes']) if rec['special_notes'] else ""
 
             st.markdown(f"""
-            <div class="outfit-hero">
-                <h3 style="margin-top:0;color:#64b5f6;font-weight:700">&#128084; Outfit Recommendation</h3>
-                <div class="outfit-section-title">Clothing Layers</div>
+            <div class="outfit-card">
+                <h3 style="margin-top:0;color:#2B6CB0;font-weight:700;font-size:1.15rem">Outfit Recommendation</h3>
+                <div class="outfit-label">Clothing Layers</div>
                 <div>{layers_html}</div>
-                <div class="outfit-section-title">Footwear</div>
-                <div><span class="outfit-item">&#128095; {rec['footwear']}</span></div>
-                {'<div class="outfit-section-title">Accessories</div><div>' + acc_html + '</div>' if acc_html else ''}
+                <div class="outfit-label">Footwear</div>
+                <div><span class="outfit-tag">{rec['footwear']}</span></div>
+                {'<div class="outfit-label">Accessories</div><div>' + acc_html + '</div>' if acc_html else ''}
                 {notes_html}
             </div>
             """, unsafe_allow_html=True)
 
-            # SMS preview as phone mockup
             st.markdown("")
             st.markdown("##### SMS Preview")
             sms_text = (
@@ -740,7 +683,7 @@ with tab2:
             )
             st.markdown(f"""
             <div class="sms-phone">
-                <div class="sms-phone-header">&#128172; SMS Preview</div>
+                <div class="sms-header">SMS Preview</div>
                 <div class="sms-bubble">{sms_text}</div>
             </div>
             """, unsafe_allow_html=True)
@@ -761,11 +704,11 @@ with tab3:
         alert_cities.append(secondary_city)
 
     st.markdown(f"""
-    <div class="glass-card" style="display:flex;align-items:center;gap:14px">
-        <div style="font-size:1.5rem">&#128225;</div>
+    <div class="monitor-bar">
+        <div style="font-size:1.3rem">&#128225;</div>
         <div>
-            <p style="margin:0;font-weight:600;color:white">Monitoring: {', '.join(alert_cities)}</p>
-            <p style="margin:0;font-size:0.8rem;color:rgba(255,255,255,0.4)">Auto-check every 15 minutes when scheduler is running</p>
+            <p style="font-weight:600;color:#2D3748;font-size:0.92rem">Monitoring: {', '.join(alert_cities)}</p>
+            <p style="font-size:0.78rem;color:#A0AEC0">Auto-check every 15 minutes when scheduler is running</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -779,10 +722,10 @@ with tab3:
                 for alert in alerts:
                     sev = alert.get('severity', 'unknown').upper()
                     st.markdown(f"""
-                    <div class="alert-hero">
-                        <h4>&#9888;&#65039; {alert.get('event', 'Weather Alert')}</h4>
+                    <div class="alert-danger">
+                        <h4>{alert.get('event', 'Weather Alert')}</h4>
                         <p>{alert.get('description', '')}</p>
-                        <span class="alert-severity">{sev}</span>
+                        <span class="alert-sev">{sev}</span>
                     </div>
                     """, unsafe_allow_html=True)
 
@@ -793,26 +736,25 @@ with tab3:
                         st.success(f"Alert SMS {result['status']}!")
             else:
                 st.markdown(f"""
-                <div class="alert-safe">
-                    <div style="font-size:2rem;margin-bottom:8px">&#9989;</div>
-                    <p style="margin:0;font-size:1.1rem;font-weight:600">All Clear in {city}</p>
-                    <p style="margin:4px 0 0 0;font-size:0.85rem;opacity:0.7">No severe weather alerts detected</p>
+                <div class="alert-ok">
+                    <p style="font-size:1.6rem;margin:0 0 6px 0">&#9989;</p>
+                    <p style="margin:0;font-size:1.05rem;font-weight:600">All Clear in {city}</p>
+                    <p style="margin:4px 0 0 0;font-size:0.82rem;opacity:0.7">No severe weather alerts detected</p>
                 </div>
                 """, unsafe_allow_html=True)
 
-    # Alert history
     st.markdown("")
     st.markdown("##### Recent Alert History")
     recent_alerts = get_recent_alerts(limit=10)
     if recent_alerts:
         for alert in recent_alerts:
             st.markdown(f"""
-            <div class="glass-card" style="padding:12px 18px;margin-bottom:8px">
-                <span style="font-size:0.75rem;color:rgba(255,255,255,0.3)">{alert['detected_at']}</span>
-                <span style="margin:0 10px;color:rgba(255,255,255,0.15)">|</span>
-                <span style="font-weight:600;color:white">{alert['city']}</span>
-                <span style="margin:0 10px;color:rgba(255,255,255,0.15)">|</span>
-                <span style="color:#ffcc80">{alert['alert_type']}</span>
+            <div class="hist-item">
+                <span style="color:#A0AEC0">{alert['detected_at']}</span>
+                <span style="margin:0 8px;color:#E2E8F0">|</span>
+                <span style="font-weight:600;color:#2D3748">{alert['city']}</span>
+                <span style="margin:0 8px;color:#E2E8F0">|</span>
+                <span style="color:#DD6B20">{alert['alert_type']}</span>
             </div>
             """, unsafe_allow_html=True)
     else:
@@ -848,27 +790,25 @@ with tab4:
             else:
                 add_event(
                     event_type, event_desc, origin, destination,
-                    event_date.strftime("%Y-%m-%d"),
-                    event_time.strftime("%H:%M"),
-                    notify_before,
+                    event_date.strftime("%Y-%m-%d"), event_time.strftime("%H:%M"), notify_before,
                 )
                 st.success(f"Event added: {event_desc}")
 
     st.markdown("")
     st.markdown("##### Upcoming Events")
 
-    EVENT_TYPE_ICONS = {"Flight": "&#9992;&#65039;", "Train": "&#128646;", "Outdoor Activity": "&#9968;&#65039;", "Business Trip": "&#128188;", "Other": "&#128197;"}
+    EVENT_ICONS = {"Flight": "&#9992;&#65039;", "Train": "&#128646;", "Outdoor Activity": "&#9968;&#65039;", "Business Trip": "&#128188;", "Other": "&#128197;"}
 
     events = get_events(upcoming_only=True)
     if events:
         for ev in events:
-            icon = EVENT_TYPE_ICONS.get(ev['event_type'], "&#128197;")
-            badge = '<span class="event-badge-done">Notified</span>' if ev["notified"] else '<span class="event-badge-pending">Pending</span>'
+            icon = EVENT_ICONS.get(ev['event_type'], "&#128197;")
+            badge = '<span class="badge-done">Notified</span>' if ev["notified"] else '<span class="badge-pending">Pending</span>'
 
             st.markdown(f"""
-            <div class="event-item">
-                <div class="event-icon">{icon}</div>
-                <div class="event-info">
+            <div class="ev-item">
+                <div class="ev-icon">{icon}</div>
+                <div class="ev-body">
                     <h4>{ev['event_description']}</h4>
                     <p>{ev['origin_city']} &#8594; {ev['destination_city']} | {ev['event_date']} {ev['event_time']}</p>
                 </div>
@@ -876,7 +816,7 @@ with tab4:
             </div>
             """, unsafe_allow_html=True)
 
-            with st.expander(f"Actions for: {ev['event_description']}"):
+            with st.expander(f"Actions: {ev['event_description']}"):
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     if st.button("Preview Weather", key=f"preview_{ev['id']}"):
@@ -894,11 +834,10 @@ with tab4:
                             advice = get_event_clothing(o_weather, d_weather, ev["event_type"])
                             st.markdown(f"""
                             <div class="sms-phone">
-                                <div class="sms-phone-header">&#9992;&#65039; Travel Outfit Advice</div>
+                                <div class="sms-header">Travel Outfit Advice</div>
                                 <div class="sms-bubble">{advice}</div>
                             </div>
                             """, unsafe_allow_html=True)
-
                 with col2:
                     if st.button("Send Reminder", key=f"remind_{ev['id']}"):
                         settings = get_user_settings()
@@ -911,7 +850,6 @@ with tab4:
                             advice = get_event_clothing(o_w, d_w, ev["event_type"])
                         result = send_event_reminder_sms(settings["phone_number"], ev, o_w, d_w, advice)
                         st.success(f"Reminder SMS {result['status']}!")
-
                 with col3:
                     if st.button("Delete", key=f"del_{ev['id']}", type="secondary"):
                         delete_event(ev["id"])
@@ -948,12 +886,11 @@ with tab5:
     sms_history = get_sms_history(limit=20)
     if sms_history:
         for sms in sms_history:
-            status_color = "#4caf50" if sms['status'] == 'sent' else "#ff9800" if sms['status'] == 'simulated' else "#f44336"
             with st.expander(f"{sms['message_type'].upper()} | {sms['sent_at']}"):
-                st.markdown(f"**To:** {sms['phone_number']}  |  **Status:** :{sms['status']}:")
+                st.markdown(f"**To:** {sms['phone_number']}  |  **Status:** {sms['status']}")
                 st.markdown(f"""
                 <div class="sms-phone">
-                    <div class="sms-phone-header">&#128172; {sms['message_type']}</div>
+                    <div class="sms-header">{sms['message_type']}</div>
                     <div class="sms-bubble">{sms['message_body']}</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -964,6 +901,6 @@ with tab5:
 # --- Footer ---
 st.markdown("""
 <div class="footer">
-    &#9925; WeatherWiseBot &mdash; Stay weather-wise, every day!
+    WeatherWiseBot &mdash; Stay weather-wise, every day
 </div>
 """, unsafe_allow_html=True)
