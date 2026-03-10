@@ -446,9 +446,14 @@ section[data-testid="stSidebar"] .stMarkdown h3 {
 }
 .stTabs [data-baseweb="tab"] {
     border-radius: 10px;
-    padding: 12px 24px;
-    font-weight: 700;
-    font-size: 1.15rem;
+    padding: 14px 28px;
+    font-weight: 800 !important;
+    font-size: 1.35rem !important;
+}
+.stTabs [data-baseweb="tab"] p,
+.stTabs [data-baseweb="tab"] span {
+    font-weight: 800 !important;
+    font-size: 1.35rem !important;
 }
 
 /* ---- Compare Card ---- */
