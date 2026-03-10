@@ -740,7 +740,6 @@ with tab2:
                 <div class="outfit-section-title">Footwear</div>
                 <div><span class="outfit-item">&#128095; {rec['footwear']}</span></div>
                 {'<div class="outfit-section-title">Accessories</div><div>' + acc_html + '</div>' if acc_html else ''}
-                {notes_html}
             </div>
             """, unsafe_allow_html=True)
 
