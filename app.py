@@ -74,9 +74,9 @@ st.markdown("""
 
 /* ---- Header ---- */
 .hero-container {
-    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-    border-radius: 20px;
-    padding: 40px 40px 30px 40px;
+    background: linear-gradient(135deg, #0f0c29 0%, #1a1a4e 30%, #302b63 60%, #24243e 100%);
+    border-radius: 24px;
+    padding: 40px 40px 35px 40px;
     margin-bottom: 25px;
     position: relative;
     overflow: hidden;
@@ -85,16 +85,71 @@ st.markdown("""
     content: '';
     position: absolute;
     top: -50%;
-    right: -20%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(66,165,245,0.15) 0%, transparent 70%);
+    right: -15%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(66,165,245,0.12) 0%, transparent 70%);
     border-radius: 50%;
 }
+
+/* ---- Mascot ---- */
+.hero-mascot {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    flex-shrink: 0;
+    animation: mascotBounce 2s ease-in-out infinite;
+}
+.mascot-cloud {
+    font-size: 5rem;
+    line-height: 1;
+    filter: drop-shadow(0 4px 12px rgba(66,165,245,0.4));
+}
+.mascot-face {
+    position: absolute;
+    bottom: -2px;
+    right: -4px;
+    font-size: 1.8rem;
+    animation: wiggle 3s ease-in-out infinite;
+}
+@keyframes mascotBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+@keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(6deg); }
+    75% { transform: rotate(-6deg); }
+}
+
+/* ---- Floating doodles ---- */
+.hero-weather-doodles {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 100%;
+    pointer-events: none;
+}
+.doodle {
+    position: absolute;
+    opacity: 0.18;
+    animation: floatUp 6s ease-in-out infinite;
+}
+.d1 { font-size: 2rem; top: 15%; right: 20%; animation-delay: 0s; }
+.d2 { font-size: 2.4rem; top: 50%; right: 60%; animation-delay: 1.2s; }
+.d3 { font-size: 1.6rem; top: 70%; right: 15%; animation-delay: 2.5s; }
+.d4 { font-size: 1.8rem; top: 10%; right: 55%; animation-delay: 3.8s; }
+.d5 { font-size: 2.2rem; top: 55%; right: 35%; animation-delay: 0.8s; }
+@keyframes floatUp {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.18; }
+    50% { transform: translateY(-12px) scale(1.1); opacity: 0.3; }
+}
+
 .hero-title {
-    font-size: 2.8rem;
+    font-size: 3.2rem;
     font-weight: 800;
-    background: linear-gradient(90deg, #64b5f6, #42a5f5, #1e88e5, #90caf9);
+    background: linear-gradient(90deg, #64b5f6, #42a5f5, #1e88e5, #90caf9, #64b5f6);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -108,23 +163,11 @@ st.markdown("""
     100% { background-position: 0% center; }
 }
 .hero-sub {
-    font-size: 1.05rem;
-    color: rgba(255,255,255,0.6);
-    margin-top: 5px;
-    font-weight: 300;
-    letter-spacing: 0.5px;
-}
-.hero-badge {
-    display: inline-block;
-    background: rgba(66,165,245,0.15);
-    border: 1px solid rgba(66,165,245,0.3);
-    color: #90caf9;
-    padding: 4px 14px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    margin-top: 12px;
-    letter-spacing: 0.5px;
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.55);
+    margin-top: 6px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
 }
 
 /* ---- Cards ---- */
@@ -438,9 +481,9 @@ with st.sidebar:
     st.markdown("")
     st.markdown("""
     <div style="text-align:center;margin-bottom:20px">
-        <div style="font-size:2rem;margin-bottom:4px">&#9925;</div>
-        <div style="font-size:1.1rem;font-weight:700;color:#64b5f6;letter-spacing:-0.5px">WeatherWiseBot</div>
-        <div style="font-size:0.7rem;color:rgba(255,255,255,0.3)">Intelligent Weather System</div>
+        <div style="font-size:3.5rem;margin-bottom:2px;animation: mascotBounce 2s ease-in-out infinite">&#9925;</div>
+        <div style="font-size:1.2rem;font-weight:800;color:#64b5f6;letter-spacing:-0.5px">WeatherWiseBot</div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:2px">&#9889; Your Smart Weather Buddy</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -498,19 +541,33 @@ with st.sidebar:
 # --- Hero Header ---
 st.markdown("""
 <div class="hero-container">
-    <p class="hero-title">WeatherWiseBot</p>
-    <p class="hero-sub">An Intelligent Weather Forecast Notification System</p>
-    <span class="hero-badge">HKMU CAPSTONE 2026</span>
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <div class="hero-mascot">
+            <div class="mascot-cloud">&#9925;</div>
+            <div class="mascot-face">&#128566;</div>
+        </div>
+        <div>
+            <p class="hero-title">WeatherWiseBot</p>
+            <p class="hero-sub">Your smart weather buddy &#8212; forecasts, outfit tips & alerts!</p>
+        </div>
+        <div class="hero-weather-doodles">
+            <span class="doodle d1">&#127782;&#65039;</span>
+            <span class="doodle d2">&#9728;&#65039;</span>
+            <span class="doodle d3">&#10052;&#65039;</span>
+            <span class="doodle d4">&#9889;</span>
+            <span class="doodle d5">&#127752;</span>
+        </div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
 # --- Main Tabs ---
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "&#127780;&#65039; Weather Forecast",
-    "&#128084; Outfit Recommendation",
-    "&#9888;&#65039; Severe Alerts",
-    "&#128197; Schedule Planner",
-    "&#128172; SMS Log",
+    "&#127780;&#65039;  Weather",
+    "&#128084;  Outfit",
+    "&#9888;&#65039;  Alerts",
+    "&#9992;&#65039;  Planner",
+    "&#128172;  SMS Log",
 ])
 
 
@@ -907,6 +964,6 @@ with tab5:
 # --- Footer ---
 st.markdown("""
 <div class="footer">
-    WeatherWiseBot &mdash; COMP 8960SEF Capstone Project &middot; Hong Kong Metropolitan University &middot; 2026
+    &#9925; WeatherWiseBot &mdash; Stay weather-wise, every day!
 </div>
 """, unsafe_allow_html=True)
