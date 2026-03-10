@@ -16,6 +16,47 @@ from sms_service import send_daily_forecast_sms, send_severe_alert_sms, send_eve
 from scheduler_service import start_scheduler, stop_scheduler, job_daily_forecast, job_check_severe_weather
 from config import SUPPORTED_CITIES
 
+# --- Weather icon mapping ---
+WEATHER_ICONS = {
+    "clear sky": "sun_behind_cloud", "few clouds": "sun_behind_small_cloud",
+    "scattered clouds": "cloud", "broken clouds": "cloud",
+    "overcast clouds": "cloud", "shower rain": "cloud_with_rain",
+    "rain": "cloud_with_rain", "light rain": "cloud_with_rain",
+    "moderate rain": "cloud_with_rain", "heavy intensity rain": "cloud_with_rain",
+    "thunderstorm": "cloud_with_lightning_and_rain", "snow": "snowflake",
+    "mist": "fog", "haze": "fog", "fog": "fog",
+}
+
+WEATHER_EMOJI = {
+    "clear sky": "&#9728;&#65039;", "few clouds": "&#9925;",
+    "scattered clouds": "&#9729;&#65039;", "broken clouds": "&#9729;&#65039;",
+    "overcast clouds": "&#9729;&#65039;", "shower rain": "&#127783;&#65039;",
+    "rain": "&#127783;&#65039;", "light rain": "&#127782;&#65039;",
+    "moderate rain": "&#127783;&#65039;", "heavy intensity rain": "&#127783;&#65039;",
+    "thunderstorm": "&#9889;", "snow": "&#10052;&#65039;",
+    "mist": "&#127787;&#65039;", "haze": "&#127787;&#65039;", "fog": "&#127787;&#65039;",
+}
+
+def get_weather_emoji(desc):
+    d = desc.lower() if desc else ""
+    for key, emoji in WEATHER_EMOJI.items():
+        if key in d:
+            return emoji
+    return "&#127780;&#65039;"
+
+def get_temp_color(temp):
+    if temp >= 35: return "#ff4444"
+    if temp >= 28: return "#ff8c00"
+    if temp >= 22: return "#ffd700"
+    if temp >= 15: return "#7ec8e3"
+    if temp >= 5:  return "#4a90d9"
+    return "#a0c4ff"
+
+def get_uv_bar(rain_chance):
+    color = "#4caf50" if rain_chance < 30 else "#ff9800" if rain_chance < 60 else "#f44336"
+    return f'<div style="background:#2a2a3e;border-radius:10px;height:8px;width:100%;margin:4px 0"><div style="background:{color};border-radius:10px;height:8px;width:{min(rain_chance, 100)}%"></div></div>'
+
+
 # --- Page Config ---
 st.set_page_config(
     page_title="WeatherWiseBot",
@@ -24,75 +65,366 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# --- Custom CSS ---
+# --- Global CSS ---
 st.markdown("""
 <style>
-    .main-header {
-        font-size: 2.5rem;
-        font-weight: 700;
-        background: linear-gradient(90deg, #1e88e5, #42a5f5, #64b5f6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0;
-    }
-    .sub-header {
-        font-size: 1.1rem;
-        color: #666;
-        margin-top: -10px;
-        margin-bottom: 20px;
-    }
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 20px;
-        border-radius: 15px;
-        color: white;
-        text-align: center;
-    }
-    .weather-card {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-        padding: 25px;
-        border-radius: 15px;
-        color: white;
-        margin-bottom: 15px;
-    }
-    .alert-card {
-        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-        padding: 15px;
-        border-radius: 10px;
-        color: white;
-        margin-bottom: 10px;
-    }
-    .event-card {
-        background: linear-gradient(135deg, #a8e6cf 0%, #88d8a8 100%);
-        padding: 15px;
-        border-radius: 10px;
-        color: #333;
-        margin-bottom: 10px;
-    }
-    .outfit-card {
-        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-        padding: 20px;
-        border-radius: 15px;
-        color: #333;
-    }
-    .sms-preview {
-        background: #e8f5e9;
-        border-left: 4px solid #4caf50;
-        padding: 15px;
-        border-radius: 5px;
-        font-family: monospace;
-        font-size: 0.85rem;
-        white-space: pre-wrap;
-    }
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        padding: 10px 20px;
-        border-radius: 8px;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+* { font-family: 'Inter', sans-serif; }
+
+/* ---- Header ---- */
+.hero-container {
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    border-radius: 20px;
+    padding: 40px 40px 30px 40px;
+    margin-bottom: 25px;
+    position: relative;
+    overflow: hidden;
+}
+.hero-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(66,165,245,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+}
+.hero-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, #64b5f6, #42a5f5, #1e88e5, #90caf9);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 3s ease infinite;
+    margin: 0;
+    letter-spacing: -1px;
+}
+@keyframes shimmer {
+    0% { background-position: 0% center; }
+    50% { background-position: 100% center; }
+    100% { background-position: 0% center; }
+}
+.hero-sub {
+    font-size: 1.05rem;
+    color: rgba(255,255,255,0.6);
+    margin-top: 5px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+}
+.hero-badge {
+    display: inline-block;
+    background: rgba(66,165,245,0.15);
+    border: 1px solid rgba(66,165,245,0.3);
+    color: #90caf9;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 12px;
+    letter-spacing: 0.5px;
+}
+
+/* ---- Cards ---- */
+.glass-card {
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.weather-hero-card {
+    background: linear-gradient(135deg, #1a237e 0%, #283593 40%, #1565c0 100%);
+    border-radius: 20px;
+    padding: 35px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+.weather-hero-card::after {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+}
+.weather-temp-big {
+    font-size: 4.5rem;
+    font-weight: 800;
+    letter-spacing: -3px;
+    line-height: 1;
+    margin: 10px 0;
+}
+.weather-desc {
+    font-size: 1.2rem;
+    font-weight: 400;
+    opacity: 0.85;
+    text-transform: capitalize;
+}
+.weather-detail {
+    display: inline-block;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 8px 16px;
+    margin: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.weather-city-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-bottom: 0;
+}
+
+/* ---- Forecast Day Card ---- */
+.forecast-day {
+    background: linear-gradient(180deg, rgba(30,60,114,0.6) 0%, rgba(42,82,152,0.4) 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 20px 16px;
+    text-align: center;
+    color: white;
+    transition: transform 0.2s;
+}
+.forecast-day:hover { transform: translateY(-3px); }
+.forecast-day-name { font-size: 0.8rem; font-weight: 600; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
+.forecast-emoji { font-size: 2rem; margin: 8px 0; }
+.forecast-temp-high { font-size: 1.4rem; font-weight: 700; }
+.forecast-temp-low { font-size: 0.9rem; opacity: 0.6; }
+.forecast-rain { font-size: 0.75rem; opacity: 0.5; margin-top: 4px; }
+
+/* ---- Outfit Card ---- */
+.outfit-hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 30px;
+    color: white;
+}
+.outfit-section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 8px;
+    margin-top: 18px;
+}
+.outfit-item {
+    display: inline-block;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 8px 16px;
+    margin: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: white;
+}
+.outfit-note {
+    background: rgba(255,152,0,0.1);
+    border-left: 3px solid #ff9800;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: #ffcc80;
+}
+
+/* ---- Alert Card ---- */
+.alert-hero {
+    background: linear-gradient(135deg, #b71c1c 0%, #d32f2f 50%, #c62828 100%);
+    border-radius: 16px;
+    padding: 24px;
+    color: white;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+}
+.alert-hero::before {
+    content: '&#9888;&#65039;';
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 2rem;
+    opacity: 0.2;
+}
+.alert-hero h4 { margin: 0 0 8px 0; font-weight: 700; font-size: 1.1rem; }
+.alert-hero p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
+.alert-severity {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 8px;
+}
+
+.alert-safe {
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+    border-radius: 16px;
+    padding: 24px;
+    color: white;
+    text-align: center;
+}
+
+/* ---- SMS Preview ---- */
+.sms-phone {
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 20px;
+    max-width: 380px;
+    margin: 10px auto;
+}
+.sms-phone-header {
+    text-align: center;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+.sms-bubble {
+    background: rgba(66,165,245,0.15);
+    border: 1px solid rgba(66,165,245,0.2);
+    border-radius: 14px 14px 4px 14px;
+    padding: 14px 16px;
+    color: rgba(255,255,255,0.9);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* ---- Event Card ---- */
+.event-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.event-icon {
+    background: linear-gradient(135deg, #1e88e5, #42a5f5);
+    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+.event-info { flex: 1; }
+.event-info h4 { margin: 0; font-size: 1rem; font-weight: 600; color: white; }
+.event-info p { margin: 2px 0 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+.event-badge-pending {
+    background: rgba(255,152,0,0.15);
+    color: #ffb74d;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+.event-badge-done {
+    background: rgba(76,175,80,0.15);
+    color: #81c784;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* ---- Metric Mini Card ---- */
+.mini-metric {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+}
+.mini-metric-icon { font-size: 1.5rem; margin-bottom: 6px; }
+.mini-metric-value { font-size: 1.6rem; font-weight: 700; color: white; }
+.mini-metric-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+/* ---- Sidebar ---- */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0f0c29 0%, #1a1a2e 100%);
+}
+section[data-testid="stSidebar"] .stMarkdown h3 {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+}
+
+/* ---- Tabs ---- */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 4px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+    padding: 4px;
+}
+.stTabs [data-baseweb="tab"] {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+/* ---- Compare Card ---- */
+.compare-card {
+    background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+    border-radius: 16px;
+    padding: 24px;
+    color: white;
+    text-align: center;
+}
+.compare-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+/* ---- Footer ---- */
+.footer {
+    text-align: center;
+    padding: 20px 0 10px 0;
+    color: rgba(255,255,255,0.2);
+    font-size: 0.72rem;
+    letter-spacing: 0.5px;
+}
+
+/* Hide Streamlit defaults */
+#MainMenu {visibility: hidden;}
+header {visibility: hidden;}
+footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
+
 
 # --- Init ---
 init_db()
@@ -101,14 +433,23 @@ if "scheduler_running" not in st.session_state:
     st.session_state.scheduler_running = False
 
 
-# --- Sidebar: User Settings ---
+# --- Sidebar ---
 with st.sidebar:
-    st.markdown("### Settings")
+    st.markdown("")
+    st.markdown("""
+    <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:2rem;margin-bottom:4px">&#9925;</div>
+        <div style="font-size:1.1rem;font-weight:700;color:#64b5f6;letter-spacing:-0.5px">WeatherWiseBot</div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.3)">Intelligent Weather System</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### User Settings")
 
     settings = get_user_settings()
+    city_list = list(SUPPORTED_CITIES.keys())
 
     phone = st.text_input("Phone Number (E.164)", value=settings["phone_number"] if settings else "+85200000000")
-    city_list = list(SUPPORTED_CITIES.keys())
 
     primary_city = st.selectbox(
         "Primary City",
@@ -125,7 +466,7 @@ with st.sidebar:
         value=datetime.strptime(settings["notification_time"] if settings else "07:00", "%H:%M").time(),
     )
     severe_enabled = st.toggle(
-        "Enable Severe Weather Alerts",
+        "Severe Weather Alerts",
         value=bool(settings["severe_alerts_enabled"]) if settings else True,
     )
 
@@ -136,9 +477,7 @@ with st.sidebar:
         )
         st.success("Settings saved!")
 
-    st.divider()
-
-    # Scheduler control
+    st.markdown("---")
     st.markdown("### Scheduler")
     col1, col2 = st.columns(2)
     with col1:
@@ -151,29 +490,32 @@ with st.sidebar:
             st.session_state.scheduler_running = False
 
     if st.session_state.scheduler_running:
-        st.success("Scheduler is running")
+        st.markdown('<div style="text-align:center;color:#4caf50;font-size:0.8rem;margin-top:8px">&#9679; Scheduler Running</div>', unsafe_allow_html=True)
     else:
-        st.info("Scheduler is stopped")
+        st.markdown('<div style="text-align:center;color:rgba(255,255,255,0.3);font-size:0.8rem;margin-top:8px">&#9679; Scheduler Stopped</div>', unsafe_allow_html=True)
 
 
-# --- Header ---
-st.markdown('<p class="main-header">WeatherWiseBot</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">An Intelligent Weather Forecast Notification System</p>', unsafe_allow_html=True)
+# --- Hero Header ---
+st.markdown("""
+<div class="hero-container">
+    <p class="hero-title">WeatherWiseBot</p>
+    <p class="hero-sub">An Intelligent Weather Forecast Notification System</p>
+    <span class="hero-badge">HKMU CAPSTONE 2026</span>
+</div>
+""", unsafe_allow_html=True)
 
 # --- Main Tabs ---
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "Weather Forecast",
-    "Outfit Recommendation",
-    "Severe Weather Alerts",
-    "Schedule Plan Helper",
-    "SMS & Notification Log",
+    "&#127780;&#65039; Weather Forecast",
+    "&#128084; Outfit Recommendation",
+    "&#9888;&#65039; Severe Alerts",
+    "&#128197; Schedule Planner",
+    "&#128172; SMS Log",
 ])
 
 
 # ===== TAB 1: Weather Forecast =====
 with tab1:
-    st.subheader("Region-Specific Weather Forecast")
-
     forecast_city = st.selectbox("Select City", city_list, key="forecast_city")
 
     if st.button("Get Forecast", type="primary", key="btn_forecast"):
@@ -182,29 +524,47 @@ with tab1:
             forecast = fetch_forecast(forecast_city)
 
         if "error" in current:
-            st.error(f"Error fetching weather: {current['error']}")
+            st.error(f"Error: {current['error']}")
         else:
-            # Current weather display
+            emoji = get_weather_emoji(current['description'])
+            temp_color = get_temp_color(current['temperature'])
+
+            # Hero weather card
             st.markdown(f"""
-            <div class="weather-card">
-                <h2>{forecast_city}</h2>
-                <h1>{current['temperature']}°C</h1>
-                <p>Feels like {current['feels_like']}°C | {current['description'].title()}</p>
-                <p>Humidity: {current['humidity']}% | Wind: {current['wind_speed']} m/s | Clouds: {current['clouds']}%</p>
+            <div class="weather-hero-card">
+                <p class="weather-city-name">{forecast_city}</p>
+                <p class="weather-desc">{emoji} {current['description'].title()}</p>
+                <p class="weather-temp-big" style="color:{temp_color}">{current['temperature']}&#176;C</p>
+                <p style="font-size:0.9rem;opacity:0.6;margin-top:-5px">Feels like {current['feels_like']}&#176;C</p>
+                <div style="margin-top:16px">
+                    <span class="weather-detail">&#128167; {current['humidity']}%</span>
+                    <span class="weather-detail">&#127744; {current['wind_speed']} m/s</span>
+                    <span class="weather-detail">&#9729;&#65039; {current['clouds']}%</span>
+                    <span class="weather-detail">&#128065; {current['visibility']/1000:.1f} km</span>
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
-            # Metrics row
+            # Metrics
             col1, col2, col3, col4 = st.columns(4)
-            col1.metric("Temperature", f"{current['temperature']}°C", f"Feels {current['feels_like']}°C")
-            col2.metric("Humidity", f"{current['humidity']}%")
-            col3.metric("Wind Speed", f"{current['wind_speed']} m/s")
-            col4.metric("Visibility", f"{current['visibility'] / 1000:.1f} km")
+            for col, icon, val, label in [
+                (col1, "&#127777;&#65039;", f"{current['temperature']}&#176;C", "Temperature"),
+                (col2, "&#128167;", f"{current['humidity']}%", "Humidity"),
+                (col3, "&#127744;", f"{current['wind_speed']} m/s", "Wind"),
+                (col4, "&#128065;", f"{current['visibility']/1000:.1f} km", "Visibility"),
+            ]:
+                col.markdown(f"""
+                <div class="mini-metric">
+                    <div class="mini-metric-icon">{icon}</div>
+                    <div class="mini-metric-value">{val}</div>
+                    <div class="mini-metric-label">{label}</div>
+                </div>
+                """, unsafe_allow_html=True)
 
             # 5-day forecast
             if "forecasts" in forecast:
-                st.markdown("#### 5-Day Forecast")
-                # Group by date
+                st.markdown("")
+                st.markdown("##### 5-Day Forecast")
                 by_date = {}
                 for f in forecast["forecasts"]:
                     d = f["datetime"][:10]
@@ -215,15 +575,22 @@ with tab1:
                     with cols[i]:
                         temps = [it["temperature"] for it in items]
                         rain_chances = [it["rain_chance"] for it in items]
-                        st.markdown(f"**{d}**")
-                        st.markdown(f"High: {max(temps):.1f}°C")
-                        st.markdown(f"Low: {min(temps):.1f}°C")
-                        st.markdown(f"Rain: {max(rain_chances):.0f}%")
-                        st.markdown(f"{items[len(items)//2]['description'].title()}")
+                        mid_desc = items[len(items)//2]["description"]
+                        day_emoji = get_weather_emoji(mid_desc)
+                        day_name = datetime.strptime(d, "%Y-%m-%d").strftime("%a")
+                        st.markdown(f"""
+                        <div class="forecast-day">
+                            <div class="forecast-day-name">{day_name}<br/>{d[5:]}</div>
+                            <div class="forecast-emoji">{day_emoji}</div>
+                            <div class="forecast-temp-high">{max(temps):.0f}&#176;</div>
+                            <div class="forecast-temp-low">{min(temps):.0f}&#176;</div>
+                            <div class="forecast-rain">&#9730; {max(rain_chances):.0f}%</div>
+                        </div>
+                        """, unsafe_allow_html=True)
 
-    # Quick compare two cities
-    st.divider()
-    st.markdown("#### Compare Two Cities")
+    # Compare
+    st.markdown("")
+    st.markdown("##### Compare Two Cities")
     cc1, cc2 = st.columns(2)
     with cc1:
         compare1 = st.selectbox("City 1", city_list, key="cmp1")
@@ -238,23 +605,26 @@ with tab1:
         if "error" not in w1 and "error" not in w2:
             col1, col2 = st.columns(2)
             for col, w, name in [(col1, w1, compare1), (col2, w2, compare2)]:
-                with col:
-                    st.markdown(f"""
-                    <div class="weather-card">
-                        <h3>{name}</h3>
-                        <h2>{w['temperature']}°C</h2>
-                        <p>{w['description'].title()}</p>
-                        <p>Humidity: {w['humidity']}% | Wind: {w['wind_speed']} m/s</p>
+                e = get_weather_emoji(w['description'])
+                tc = get_temp_color(w['temperature'])
+                col.markdown(f"""
+                <div class="compare-card">
+                    <p style="font-size:1.2rem;font-weight:600;margin:0">{name}</p>
+                    <p style="font-size:2rem;margin:0">{e}</p>
+                    <p style="font-size:2.5rem;font-weight:800;color:{tc};margin:5px 0">{w['temperature']}&#176;C</p>
+                    <p style="font-size:0.9rem;opacity:0.7;margin:0">{w['description'].title()}</p>
+                    <div style="margin-top:10px">
+                        <span class="weather-detail">&#128167; {w['humidity']}%</span>
+                        <span class="weather-detail">&#127744; {w['wind_speed']} m/s</span>
                     </div>
-                    """, unsafe_allow_html=True)
+                </div>
+                """, unsafe_allow_html=True)
         else:
-            st.error("Failed to fetch weather for one or both cities.")
+            st.error("Failed to fetch weather data.")
 
 
 # ===== TAB 2: Outfit Recommendation =====
 with tab2:
-    st.subheader("Outfit Recommendation")
-
     outfit_city = st.selectbox("Select City", city_list, key="outfit_city")
 
     if st.button("Get Recommendation", type="primary", key="btn_outfit"):
@@ -263,40 +633,60 @@ with tab2:
 
         if summary:
             rec = get_clothing_recommendation(
-                summary["current_temp"],
-                summary["rain_chance"],
-                summary["wind_speed"],
-                summary["description"],
+                summary["current_temp"], summary["rain_chance"],
+                summary["wind_speed"], summary["description"],
             )
+            emoji = get_weather_emoji(summary['description'])
 
+            # Weather summary strip
             st.markdown(f"""
-            <div class="weather-card">
-                <h3>{outfit_city} - Current Conditions</h3>
-                <p>Temperature: {summary['current_temp']}°C | Rain Chance: {summary['rain_chance']}% | Wind: {summary['wind_speed']} m/s</p>
-                <p>{summary['description'].title()}</p>
+            <div class="weather-hero-card" style="padding:20px 30px">
+                <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+                    <div style="font-size:2.5rem">{emoji}</div>
+                    <div>
+                        <p style="margin:0;font-size:1.3rem;font-weight:700">{outfit_city}</p>
+                        <p style="margin:0;opacity:0.6">{summary['description'].title()}</p>
+                    </div>
+                    <div style="margin-left:auto;text-align:right">
+                        <p style="margin:0;font-size:2rem;font-weight:800">{summary['current_temp']}&#176;C</p>
+                        <p style="margin:0;font-size:0.8rem;opacity:0.5">Rain {summary['rain_chance']}% | Wind {summary['wind_speed']} m/s</p>
+                    </div>
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
+            # Outfit card
+            layers_html = "".join(f'<span class="outfit-item">&#128085; {l}</span>' for l in rec['layers'])
+            acc_html = "".join(f'<span class="outfit-item">&#127890; {a}</span>' for a in rec['accessories']) if rec['accessories'] else ""
+            notes_html = "".join(f'<div class="outfit-note">{n}</div>' for n in rec['special_notes']) if rec['special_notes'] else ""
+
             st.markdown(f"""
-            <div class="outfit-card">
-                <h3>Outfit Recommendation</h3>
-                <p><strong>Clothing Layers:</strong></p>
-                <ul>{''.join(f'<li>{l}</li>' for l in rec['layers'])}</ul>
-                <p><strong>Footwear:</strong> {rec['footwear']}</p>
-                {'<p><strong>Accessories:</strong> ' + ', '.join(rec['accessories']) + '</p>' if rec['accessories'] else ''}
-                {'<p><strong>Notes:</strong> ' + ' '.join(rec['special_notes']) + '</p>' if rec['special_notes'] else ''}
+            <div class="outfit-hero">
+                <h3 style="margin-top:0;color:#64b5f6;font-weight:700">&#128084; Outfit Recommendation</h3>
+                <div class="outfit-section-title">Clothing Layers</div>
+                <div>{layers_html}</div>
+                <div class="outfit-section-title">Footwear</div>
+                <div><span class="outfit-item">&#128095; {rec['footwear']}</span></div>
+                {'<div class="outfit-section-title">Accessories</div><div>' + acc_html + '</div>' if acc_html else ''}
+                {notes_html}
             </div>
             """, unsafe_allow_html=True)
 
-            # SMS preview
-            st.markdown("#### SMS Preview")
+            # SMS preview as phone mockup
+            st.markdown("")
+            st.markdown("##### SMS Preview")
             sms_text = (
                 f"WeatherWiseBot - {outfit_city}\n"
-                f"Temp: {summary['current_temp']}°C, {summary['description'].title()}\n"
+                f"Temp: {summary['current_temp']}C, {summary['description'].title()}\n"
                 f"Rain: {summary['rain_chance']}%\n\n"
                 f"Outfit: {rec['suggestion']}"
             )
-            st.markdown(f'<div class="sms-preview">{sms_text}</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="sms-phone">
+                <div class="sms-phone-header">&#128172; SMS Preview</div>
+                <div class="sms-bubble">{sms_text}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
             if st.button("Send as SMS Now", key="btn_send_outfit"):
                 settings = get_user_settings()
@@ -309,13 +699,19 @@ with tab2:
 
 # ===== TAB 3: Severe Weather Alerts =====
 with tab3:
-    st.subheader("Severe Weather Alerts")
-
     alert_cities = [primary_city]
     if secondary_city:
         alert_cities.append(secondary_city)
 
-    st.info(f"Monitoring: {', '.join(alert_cities)} | Check interval: every 15 minutes")
+    st.markdown(f"""
+    <div class="glass-card" style="display:flex;align-items:center;gap:14px">
+        <div style="font-size:1.5rem">&#128225;</div>
+        <div>
+            <p style="margin:0;font-weight:600;color:white">Monitoring: {', '.join(alert_cities)}</p>
+            <p style="margin:0;font-size:0.8rem;color:rgba(255,255,255,0.4)">Auto-check every 15 minutes when scheduler is running</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     if st.button("Check Now", type="primary", key="btn_check_alerts"):
         for city in alert_cities:
@@ -324,11 +720,12 @@ with tab3:
 
             if alerts:
                 for alert in alerts:
+                    sev = alert.get('severity', 'unknown').upper()
                     st.markdown(f"""
-                    <div class="alert-card">
-                        <h4>{alert.get('event', 'Weather Alert')}</h4>
+                    <div class="alert-hero">
+                        <h4>&#9888;&#65039; {alert.get('event', 'Weather Alert')}</h4>
                         <p>{alert.get('description', '')}</p>
-                        {'<p>Severity: ' + alert.get('severity', 'unknown').upper() + '</p>' if 'severity' in alert else ''}
+                        <span class="alert-severity">{sev}</span>
                     </div>
                     """, unsafe_allow_html=True)
 
@@ -338,27 +735,38 @@ with tab3:
                         result = send_severe_alert_sms(settings["phone_number"], city, alerts)
                         st.success(f"Alert SMS {result['status']}!")
             else:
-                st.success(f"No severe weather alerts for {city}.")
+                st.markdown(f"""
+                <div class="alert-safe">
+                    <div style="font-size:2rem;margin-bottom:8px">&#9989;</div>
+                    <p style="margin:0;font-size:1.1rem;font-weight:600">All Clear in {city}</p>
+                    <p style="margin:4px 0 0 0;font-size:0.85rem;opacity:0.7">No severe weather alerts detected</p>
+                </div>
+                """, unsafe_allow_html=True)
 
     # Alert history
-    st.divider()
-    st.markdown("#### Recent Alert History")
+    st.markdown("")
+    st.markdown("##### Recent Alert History")
     recent_alerts = get_recent_alerts(limit=10)
     if recent_alerts:
         for alert in recent_alerts:
-            st.markdown(f"**{alert['detected_at']}** | {alert['city']} | {alert['alert_type']} | {alert['severity']}")
+            st.markdown(f"""
+            <div class="glass-card" style="padding:12px 18px;margin-bottom:8px">
+                <span style="font-size:0.75rem;color:rgba(255,255,255,0.3)">{alert['detected_at']}</span>
+                <span style="margin:0 10px;color:rgba(255,255,255,0.15)">|</span>
+                <span style="font-weight:600;color:white">{alert['city']}</span>
+                <span style="margin:0 10px;color:rgba(255,255,255,0.15)">|</span>
+                <span style="color:#ffcc80">{alert['alert_type']}</span>
+            </div>
+            """, unsafe_allow_html=True)
     else:
         st.info("No alert history yet.")
 
 
 # ===== TAB 4: Schedule Plan Helper =====
 with tab4:
-    st.subheader("Schedule Plan Helper")
     st.markdown("Add travel events and receive weather-based SMS reminders before your trip.")
 
     with st.form("event_form"):
-        st.markdown("#### Add New Event")
-
         event_type = st.selectbox("Event Type", ["Flight", "Train", "Outdoor Activity", "Business Trip", "Other"])
         event_desc = st.text_input("Event Description", placeholder="e.g., Flight: Shenzhen 2PM to Shanghai 4PM")
 
@@ -376,8 +784,7 @@ with tab4:
 
         notify_before = st.selectbox("Notify Before", [12, 24, 48], index=1, format_func=lambda x: f"{x} hours")
 
-        submitted = st.form_submit_button("Add Schedule Plan", type="primary")
-
+        submitted = st.form_submit_button("Add Schedule Plan", type="primary", use_container_width=True)
         if submitted:
             if not event_desc:
                 st.error("Please enter an event description.")
@@ -390,19 +797,29 @@ with tab4:
                 )
                 st.success(f"Event added: {event_desc}")
 
-    # Preview weather for event
-    st.divider()
-    st.markdown("#### Upcoming Events")
+    st.markdown("")
+    st.markdown("##### Upcoming Events")
+
+    EVENT_TYPE_ICONS = {"Flight": "&#9992;&#65039;", "Train": "&#128646;", "Outdoor Activity": "&#9968;&#65039;", "Business Trip": "&#128188;", "Other": "&#128197;"}
 
     events = get_events(upcoming_only=True)
     if events:
         for ev in events:
-            status_icon = "[Notified]" if ev["notified"] else "[Pending]"
-            with st.expander(f"{status_icon} {ev['event_description']} - {ev['event_date']} {ev['event_time']}"):
-                st.markdown(f"**Type:** {ev['event_type']}")
-                st.markdown(f"**Route:** {ev.get('origin_city', 'N/A')} -> {ev.get('destination_city', 'N/A')}")
-                st.markdown(f"**Notify:** {ev['notify_hours_before']}h before")
+            icon = EVENT_TYPE_ICONS.get(ev['event_type'], "&#128197;")
+            badge = '<span class="event-badge-done">Notified</span>' if ev["notified"] else '<span class="event-badge-pending">Pending</span>'
 
+            st.markdown(f"""
+            <div class="event-item">
+                <div class="event-icon">{icon}</div>
+                <div class="event-info">
+                    <h4>{ev['event_description']}</h4>
+                    <p>{ev['origin_city']} &#8594; {ev['destination_city']} | {ev['event_date']} {ev['event_time']}</p>
+                </div>
+                {badge}
+            </div>
+            """, unsafe_allow_html=True)
+
+            with st.expander(f"Actions for: {ev['event_description']}"):
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     if st.button("Preview Weather", key=f"preview_{ev['id']}"):
@@ -411,17 +828,22 @@ with tab4:
 
                         if o_weather and "error" not in o_weather:
                             o_weather["city"] = ev["origin_city"]
-                            st.markdown(f"**{ev['origin_city']}**: {o_weather['temperature']}°C, {o_weather['description']}")
+                            st.markdown(f"**{ev['origin_city']}**: {o_weather['temperature']}C, {o_weather['description']}")
                         if d_weather and "error" not in d_weather:
                             d_weather["city"] = ev["destination_city"]
-                            st.markdown(f"**{ev['destination_city']}**: {d_weather['temperature']}°C, {d_weather['description']}")
+                            st.markdown(f"**{ev['destination_city']}**: {d_weather['temperature']}C, {d_weather['description']}")
 
                         if o_weather and d_weather and "error" not in o_weather and "error" not in d_weather:
                             advice = get_event_clothing(o_weather, d_weather, ev["event_type"])
-                            st.markdown(f'<div class="sms-preview">{advice}</div>', unsafe_allow_html=True)
+                            st.markdown(f"""
+                            <div class="sms-phone">
+                                <div class="sms-phone-header">&#9992;&#65039; Travel Outfit Advice</div>
+                                <div class="sms-bubble">{advice}</div>
+                            </div>
+                            """, unsafe_allow_html=True)
 
                 with col2:
-                    if st.button("Send Reminder Now", key=f"remind_{ev['id']}"):
+                    if st.button("Send Reminder", key=f"remind_{ev['id']}"):
                         settings = get_user_settings()
                         o_w = fetch_current_weather(ev["origin_city"]) if ev.get("origin_city") else None
                         d_w = fetch_current_weather(ev["destination_city"]) if ev.get("destination_city") else None
@@ -434,7 +856,7 @@ with tab4:
                         st.success(f"Reminder SMS {result['status']}!")
 
                 with col3:
-                    if st.button("Delete", key=f"del_{ev['id']}"):
+                    if st.button("Delete", key=f"del_{ev['id']}", type="secondary"):
                         delete_event(ev["id"])
                         st.rerun()
     else:
@@ -443,12 +865,9 @@ with tab4:
 
 # ===== TAB 5: SMS & Notification Log =====
 with tab5:
-    st.subheader("SMS & Notification Log")
-
     col1, col2 = st.columns(2)
-
     with col1:
-        if st.button("Send Test Forecast SMS", type="primary"):
+        if st.button("Send Test Forecast SMS", type="primary", use_container_width=True):
             settings = get_user_settings()
             if settings:
                 summary = get_daily_summary(settings["primary_city"])
@@ -461,30 +880,33 @@ with tab5:
                     st.success(f"Test SMS {result['status']}!")
                 else:
                     st.error("Could not fetch weather data.")
-
     with col2:
-        if st.button("Trigger Severe Check"):
+        if st.button("Trigger Severe Check", use_container_width=True):
             job_check_severe_weather()
             st.success("Severe weather check completed!")
 
-    st.divider()
-    st.markdown("#### Recent SMS History")
+    st.markdown("")
+    st.markdown("##### Message History")
 
     sms_history = get_sms_history(limit=20)
     if sms_history:
         for sms in sms_history:
-            with st.expander(f"[{sms['status'].upper()}] {sms['message_type']} - {sms['sent_at']}"):
-                st.markdown(f"**To:** {sms['phone_number']}")
-                st.markdown(f'<div class="sms-preview">{sms["message_body"]}</div>', unsafe_allow_html=True)
+            status_color = "#4caf50" if sms['status'] == 'sent' else "#ff9800" if sms['status'] == 'simulated' else "#f44336"
+            with st.expander(f"{sms['message_type'].upper()} | {sms['sent_at']}"):
+                st.markdown(f"**To:** {sms['phone_number']}  |  **Status:** :{sms['status']}:")
+                st.markdown(f"""
+                <div class="sms-phone">
+                    <div class="sms-phone-header">&#128172; {sms['message_type']}</div>
+                    <div class="sms-bubble">{sms['message_body']}</div>
+                </div>
+                """, unsafe_allow_html=True)
     else:
         st.info("No SMS history yet. Send a test message or start the scheduler.")
 
 
 # --- Footer ---
-st.divider()
-st.markdown(
-    "<div style='text-align: center; color: #999; font-size: 0.8rem;'>"
-    "WeatherWiseBot - COMP 8960SEF Capstone Project | HKMU 2026"
-    "</div>",
-    unsafe_allow_html=True,
-)
+st.markdown("""
+<div class="footer">
+    WeatherWiseBot &mdash; COMP 8960SEF Capstone Project &middot; Hong Kong Metropolitan University &middot; 2026
+</div>
+""", unsafe_allow_html=True)
