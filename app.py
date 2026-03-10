@@ -612,7 +612,7 @@ with tab1:
             <div class="weather-hero-card">
                 <p class="weather-city-name">{forecast_city}</p>
                 <p class="weather-desc">{emoji} {current['description'].title()}</p>
-                <p class="weather-temp-big" style="color:{temp_color}">{current['temperature']}&#176;C</p>
+                <p class="weather-temp-big" style="color:{temp_color}">{current['temperature']:.1f}&#176;C</p>
                 <p style="font-size:0.95rem;opacity:0.6;margin-top:6px">Feels like {current['feels_like']}&#176;C</p>
                 <div style="margin-top:20px">
                     <span class="weather-detail">&#128167; {current['humidity']}%</span>
