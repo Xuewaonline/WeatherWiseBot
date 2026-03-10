@@ -72,6 +72,21 @@ st.markdown("""
 
 * { font-family: 'Inter', sans-serif; }
 
+/* ---- Base font size bump ---- */
+html, body, [class*="css"] { font-size: 16px !important; }
+.stMarkdown, .stMarkdown p, .stText { font-size: 1.05rem !important; }
+.stSelectbox label, .stTextInput label, .stDateInput label,
+.stTimeInput label, .stNumberInput label, .stToggle label {
+    font-size: 0.95rem !important; font-weight: 500 !important;
+}
+.stSelectbox [data-baseweb="select"], .stTextInput input,
+.stDateInput input, .stTimeInput input {
+    font-size: 1rem !important;
+}
+button[kind="primary"], button[kind="secondary"], .stButton button {
+    font-size: 0.95rem !important;
+}
+
 /* ---- Header ---- */
 .hero-container {
     background: linear-gradient(135deg, #0f0c29 0%, #1a1a4e 30%, #302b63 60%, #24243e 100%);
@@ -147,7 +162,7 @@ st.markdown("""
 }
 
 .hero-title {
-    font-size: 3.2rem;
+    font-size: 3.6rem;
     font-weight: 800;
     background: linear-gradient(90deg, #64b5f6, #42a5f5, #1e88e5, #90caf9, #64b5f6);
     background-size: 200% auto;
@@ -163,7 +178,7 @@ st.markdown("""
     100% { background-position: 0% center; }
 }
 .hero-sub {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     color: rgba(255,255,255,0.55);
     margin-top: 6px;
     font-weight: 400;
@@ -205,14 +220,14 @@ st.markdown("""
     border-radius: 50%;
 }
 .weather-temp-big {
-    font-size: 4.5rem;
+    font-size: 5rem;
     font-weight: 800;
     letter-spacing: -3px;
     line-height: 1;
     margin: 10px 0;
 }
 .weather-desc {
-    font-size: 1.2rem;
+    font-size: 1.35rem;
     font-weight: 400;
     opacity: 0.85;
     text-transform: capitalize;
@@ -223,11 +238,11 @@ st.markdown("""
     border-radius: 12px;
     padding: 8px 16px;
     margin: 4px;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 500;
 }
 .weather-city-name {
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     font-weight: 600;
     letter-spacing: -0.5px;
     margin-bottom: 0;
@@ -244,11 +259,11 @@ st.markdown("""
     transition: transform 0.2s;
 }
 .forecast-day:hover { transform: translateY(-3px); }
-.forecast-day-name { font-size: 0.8rem; font-weight: 600; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
-.forecast-emoji { font-size: 2rem; margin: 8px 0; }
-.forecast-temp-high { font-size: 1.4rem; font-weight: 700; }
-.forecast-temp-low { font-size: 0.9rem; opacity: 0.6; }
-.forecast-rain { font-size: 0.75rem; opacity: 0.5; margin-top: 4px; }
+.forecast-day-name { font-size: 0.9rem; font-weight: 600; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
+.forecast-emoji { font-size: 2.4rem; margin: 8px 0; }
+.forecast-temp-high { font-size: 1.6rem; font-weight: 700; }
+.forecast-temp-low { font-size: 1rem; opacity: 0.6; }
+.forecast-rain { font-size: 0.85rem; opacity: 0.5; margin-top: 4px; }
 
 /* ---- Outfit Card ---- */
 .outfit-hero {
@@ -259,7 +274,7 @@ st.markdown("""
     color: white;
 }
 .outfit-section-title {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1.5px;
@@ -272,9 +287,9 @@ st.markdown("""
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 10px;
-    padding: 8px 16px;
+    padding: 10px 18px;
     margin: 4px;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
     color: white;
 }
@@ -282,9 +297,9 @@ st.markdown("""
     background: rgba(255,152,0,0.1);
     border-left: 3px solid #ff9800;
     border-radius: 0 8px 8px 0;
-    padding: 10px 14px;
+    padding: 12px 16px;
     margin-top: 12px;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     color: #ffcc80;
 }
 
@@ -306,14 +321,14 @@ st.markdown("""
     font-size: 2rem;
     opacity: 0.2;
 }
-.alert-hero h4 { margin: 0 0 8px 0; font-weight: 700; font-size: 1.1rem; }
-.alert-hero p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
+.alert-hero h4 { margin: 0 0 8px 0; font-weight: 700; font-size: 1.25rem; }
+.alert-hero p { margin: 0; font-size: 1rem; opacity: 0.9; }
 .alert-severity {
     display: inline-block;
     background: rgba(255,255,255,0.2);
     border-radius: 6px;
-    padding: 3px 10px;
-    font-size: 0.7rem;
+    padding: 4px 12px;
+    font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -339,7 +354,7 @@ st.markdown("""
 }
 .sms-phone-header {
     text-align: center;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     color: rgba(255,255,255,0.4);
     margin-bottom: 12px;
     font-weight: 500;
@@ -350,8 +365,8 @@ st.markdown("""
     border-radius: 14px 14px 4px 14px;
     padding: 14px 16px;
     color: rgba(255,255,255,0.9);
-    font-size: 0.82rem;
-    line-height: 1.5;
+    font-size: 0.95rem;
+    line-height: 1.55;
     white-space: pre-wrap;
     word-wrap: break-word;
 }
@@ -379,14 +394,14 @@ st.markdown("""
     flex-shrink: 0;
 }
 .event-info { flex: 1; }
-.event-info h4 { margin: 0; font-size: 1rem; font-weight: 600; color: white; }
-.event-info p { margin: 2px 0 0 0; font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+.event-info h4 { margin: 0; font-size: 1.1rem; font-weight: 600; color: white; }
+.event-info p { margin: 2px 0 0 0; font-size: 0.9rem; color: rgba(255,255,255,0.5); }
 .event-badge-pending {
     background: rgba(255,152,0,0.15);
     color: #ffb74d;
     padding: 4px 12px;
     border-radius: 20px;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     font-weight: 600;
 }
 .event-badge-done {
@@ -394,7 +409,7 @@ st.markdown("""
     color: #81c784;
     padding: 4px 12px;
     border-radius: 20px;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     font-weight: 600;
 }
 
@@ -406,9 +421,9 @@ st.markdown("""
     padding: 18px;
     text-align: center;
 }
-.mini-metric-icon { font-size: 1.5rem; margin-bottom: 6px; }
-.mini-metric-value { font-size: 1.6rem; font-weight: 700; color: white; }
-.mini-metric-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.mini-metric-icon { font-size: 1.7rem; margin-bottom: 6px; }
+.mini-metric-value { font-size: 1.8rem; font-weight: 700; color: white; }
+.mini-metric-label { font-size: 0.82rem; color: rgba(255,255,255,0.4); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
 
 /* ---- Sidebar ---- */
 section[data-testid="stSidebar"] {
@@ -416,7 +431,7 @@ section[data-testid="stSidebar"] {
 }
 section[data-testid="stSidebar"] .stMarkdown h3 {
     color: rgba(255,255,255,0.7);
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     font-weight: 600;
@@ -433,7 +448,7 @@ section[data-testid="stSidebar"] .stMarkdown h3 {
     border-radius: 10px;
     padding: 10px 20px;
     font-weight: 500;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
 }
 
 /* ---- Compare Card ---- */
@@ -457,7 +472,7 @@ section[data-testid="stSidebar"] .stMarkdown h3 {
     text-align: center;
     padding: 20px 0 10px 0;
     color: rgba(255,255,255,0.2);
-    font-size: 0.72rem;
+    font-size: 0.85rem;
     letter-spacing: 0.5px;
 }
 
@@ -481,9 +496,9 @@ with st.sidebar:
     st.markdown("")
     st.markdown("""
     <div style="text-align:center;margin-bottom:20px">
-        <div style="font-size:3.5rem;margin-bottom:2px;animation: mascotBounce 2s ease-in-out infinite">&#9925;</div>
-        <div style="font-size:1.2rem;font-weight:800;color:#64b5f6;letter-spacing:-0.5px">WeatherWiseBot</div>
-        <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:2px">Your Smart Weather Buddy</div>
+        <div style="font-size:3.8rem;margin-bottom:2px;animation: mascotBounce 2s ease-in-out infinite">&#9925;</div>
+        <div style="font-size:1.35rem;font-weight:800;color:#64b5f6;letter-spacing:-0.5px">WeatherWiseBot</div>
+        <div style="font-size:0.8rem;color:rgba(255,255,255,0.35);margin-top:2px">Your Smart Weather Buddy</div>
     </div>
     """, unsafe_allow_html=True)
 
