@@ -839,35 +839,93 @@ with tab3:
 
 # ===== TAB 4: Schedule Plan Helper =====
 with tab4:
-    st.markdown("Add travel events and receive weather-based SMS reminders before your trip.")
+    st.markdown("Plan your trip and get weather forecasts for departure and arrival.")
 
     with st.form("event_form"):
         event_type = st.selectbox("Event Type", ["Flight", "Train", "Outdoor Activity", "Business Trip", "Other"])
 
-        col1, col2 = st.columns(2)
-        with col1:
+        st.markdown("**Departure**")
+        dep_col1, dep_col2, dep_col3 = st.columns(3)
+        with dep_col1:
             origin = st.selectbox("Origin City", city_list, key="event_origin")
-        with col2:
-            destination = st.selectbox("Destination City", city_list, index=1, key="event_dest")
+        with dep_col2:
+            dep_date = st.date_input("Departure Date", value=date.today() + timedelta(days=1), min_value=date.today(), key="dep_date")
+        with dep_col3:
+            dep_time = st.time_input("Departure Time", value=datetime.strptime("14:00", "%H:%M").time(), key="dep_time")
 
-        col3, col4 = st.columns(2)
-        with col3:
-            event_date = st.date_input("Event Date", value=date.today() + timedelta(days=1), min_value=date.today())
-        with col4:
-            event_time = st.time_input("Event Time", value=datetime.strptime("14:00", "%H:%M").time())
+        st.markdown("**Arrival**")
+        arr_col1, arr_col2, arr_col3 = st.columns(3)
+        with arr_col1:
+            destination = st.selectbox("Destination City", city_list, index=1, key="event_dest")
+        with arr_col2:
+            arr_date = st.date_input("Arrival Date", value=date.today() + timedelta(days=1), min_value=date.today(), key="arr_date")
+        with arr_col3:
+            arr_time = st.time_input("Arrival Time", value=datetime.strptime("18:00", "%H:%M").time(), key="arr_time")
 
         notify_before = st.selectbox("Notify Before", [12, 24, 48], index=1, format_func=lambda x: f"{x} hours")
 
-        submitted = st.form_submit_button("Add Schedule Plan", type="primary", use_container_width=True)
+        submitted = st.form_submit_button("Get Travel Weather", type="primary", use_container_width=True)
         if submitted:
             event_desc = f"{event_type}: {origin} → {destination}"
             add_event(
                 event_type, event_desc, origin, destination,
-                event_date.strftime("%Y-%m-%d"),
-                event_time.strftime("%H:%M"),
+                dep_date.strftime("%Y-%m-%d"),
+                dep_time.strftime("%H:%M"),
                 notify_before,
             )
-            st.success(f"Event added: {event_desc}")
+
+            with st.spinner("Fetching weather for your trip..."):
+                dep_weather = fetch_current_weather(origin)
+                arr_weather = fetch_current_weather(destination)
+
+    if submitted and dep_weather and arr_weather and "error" not in dep_weather and "error" not in arr_weather:
+        st.markdown("")
+        col_dep, col_arr = st.columns(2)
+        with col_dep:
+            dep_emoji = get_weather_emoji(dep_weather['description'])
+            dep_tc = get_temp_color(dep_weather['temperature'])
+            st.markdown(f"""
+            <div class="compare-card">
+                <p style="font-size:0.85rem;font-weight:600;opacity:0.6;margin:0">DEPARTURE</p>
+                <p style="font-size:1.2rem;font-weight:700;margin:4px 0">{origin}</p>
+                <p style="font-size:0.85rem;opacity:0.5;margin:0">{dep_date.strftime('%Y-%m-%d')} {dep_time.strftime('%H:%M')}</p>
+                <p style="font-size:2rem;margin:8px 0">{dep_emoji}</p>
+                <p style="font-size:2.5rem;font-weight:800;color:{dep_tc};margin:5px 0">{dep_weather['temperature']:.1f}&#176;C</p>
+                <p style="font-size:0.9rem;opacity:0.7;margin:0">{dep_weather['description'].title()}</p>
+                <div style="margin-top:10px">
+                    <span class="weather-detail">&#128167; {dep_weather['humidity']:.1f}%</span>
+                    <span class="weather-detail">&#127744; {dep_weather['wind_speed']:.1f} m/s</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col_arr:
+            arr_emoji = get_weather_emoji(arr_weather['description'])
+            arr_tc = get_temp_color(arr_weather['temperature'])
+            st.markdown(f"""
+            <div class="compare-card">
+                <p style="font-size:0.85rem;font-weight:600;opacity:0.6;margin:0">ARRIVAL</p>
+                <p style="font-size:1.2rem;font-weight:700;margin:4px 0">{destination}</p>
+                <p style="font-size:0.85rem;opacity:0.5;margin:0">{arr_date.strftime('%Y-%m-%d')} {arr_time.strftime('%H:%M')}</p>
+                <p style="font-size:2rem;margin:8px 0">{arr_emoji}</p>
+                <p style="font-size:2.5rem;font-weight:800;color:{arr_tc};margin:5px 0">{arr_weather['temperature']:.1f}&#176;C</p>
+                <p style="font-size:0.9rem;opacity:0.7;margin:0">{arr_weather['description'].title()}</p>
+                <div style="margin-top:10px">
+                    <span class="weather-detail">&#128167; {arr_weather['humidity']:.1f}%</span>
+                    <span class="weather-detail">&#127744; {arr_weather['wind_speed']:.1f} m/s</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Clothing advice
+        dep_weather["city"] = origin
+        arr_weather["city"] = destination
+        advice = get_event_clothing(dep_weather, arr_weather, event_type)
+        st.markdown(f"""
+        <div class="sms-phone" style="margin-top:20px">
+            <div class="sms-phone-header">&#128084; Travel Outfit Advice</div>
+            <div class="sms-bubble">{advice}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 # ===== TAB 5: SMS & Notification Log =====
