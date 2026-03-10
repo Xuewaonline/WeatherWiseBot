@@ -446,9 +446,9 @@ section[data-testid="stSidebar"] .stMarkdown h3 {
 }
 .stTabs [data-baseweb="tab"] {
     border-radius: 10px;
-    padding: 10px 20px;
-    font-weight: 500;
-    font-size: 0.95rem;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 1.15rem;
 }
 
 /* ---- Compare Card ---- */
