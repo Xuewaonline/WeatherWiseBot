@@ -512,7 +512,7 @@ with st.sidebar:
     settings = get_user_settings()
     city_list = list(SUPPORTED_CITIES.keys())
 
-    phone = st.text_input("Phone Number (E.164)", value=settings["phone_number"] if settings else "+85200000000")
+    phone = st.text_input("Phone Number", value=settings["phone_number"] if settings else "+85200000000")
 
     primary_city = st.selectbox(
         "Primary City",
