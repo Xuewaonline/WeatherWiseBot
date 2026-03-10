@@ -843,7 +843,6 @@ with tab4:
 
     with st.form("event_form"):
         event_type = st.selectbox("Event Type", ["Flight", "Train", "Outdoor Activity", "Business Trip", "Other"])
-        event_desc = st.text_input("Event Description", placeholder="e.g., Flight: Shenzhen 2PM to Shanghai 4PM")
 
         col1, col2 = st.columns(2)
         with col1:
@@ -857,85 +856,16 @@ with tab4:
         with col4:
             event_time = st.time_input("Event Time", value=datetime.strptime("14:00", "%H:%M").time())
 
-        notify_before = st.selectbox("Notify Before", [12, 24, 48], index=1, format_func=lambda x: f"{x} hours")
-
         submitted = st.form_submit_button("Add Schedule Plan", type="primary", use_container_width=True)
         if submitted:
-            if not event_desc:
-                st.error("Please enter an event description.")
-            else:
-                add_event(
-                    event_type, event_desc, origin, destination,
-                    event_date.strftime("%Y-%m-%d"),
-                    event_time.strftime("%H:%M"),
-                    notify_before,
-                )
-                st.success(f"Event added: {event_desc}")
-
-    st.markdown("")
-    st.markdown("##### Upcoming Events")
-
-    EVENT_TYPE_ICONS = {"Flight": "&#9992;&#65039;", "Train": "&#128646;", "Outdoor Activity": "&#9968;&#65039;", "Business Trip": "&#128188;", "Other": "&#128197;"}
-
-    events = get_events(upcoming_only=True)
-    if events:
-        for ev in events:
-            icon = EVENT_TYPE_ICONS.get(ev['event_type'], "&#128197;")
-            badge = '<span class="event-badge-done">Notified</span>' if ev["notified"] else '<span class="event-badge-pending">Pending</span>'
-
-            st.markdown(f"""
-            <div class="event-item">
-                <div class="event-icon">{icon}</div>
-                <div class="event-info">
-                    <h4>{ev['event_description']}</h4>
-                    <p>{ev['origin_city']} &#8594; {ev['destination_city']} | {ev['event_date']} {ev['event_time']}</p>
-                </div>
-                {badge}
-            </div>
-            """, unsafe_allow_html=True)
-
-            with st.expander(f"Actions for: {ev['event_description']}"):
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    if st.button("Preview Weather", key=f"preview_{ev['id']}"):
-                        o_weather = fetch_current_weather(ev["origin_city"]) if ev.get("origin_city") else None
-                        d_weather = fetch_current_weather(ev["destination_city"]) if ev.get("destination_city") else None
-
-                        if o_weather and "error" not in o_weather:
-                            o_weather["city"] = ev["origin_city"]
-                            st.markdown(f"**{ev['origin_city']}**: {o_weather['temperature']}C, {o_weather['description']}")
-                        if d_weather and "error" not in d_weather:
-                            d_weather["city"] = ev["destination_city"]
-                            st.markdown(f"**{ev['destination_city']}**: {d_weather['temperature']}C, {d_weather['description']}")
-
-                        if o_weather and d_weather and "error" not in o_weather and "error" not in d_weather:
-                            advice = get_event_clothing(o_weather, d_weather, ev["event_type"])
-                            st.markdown(f"""
-                            <div class="sms-phone">
-                                <div class="sms-phone-header">&#9992;&#65039; Travel Outfit Advice</div>
-                                <div class="sms-bubble">{advice}</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-
-                with col2:
-                    if st.button("Send Reminder", key=f"remind_{ev['id']}"):
-                        settings = get_user_settings()
-                        o_w = fetch_current_weather(ev["origin_city"]) if ev.get("origin_city") else None
-                        d_w = fetch_current_weather(ev["destination_city"]) if ev.get("destination_city") else None
-                        advice = ""
-                        if o_w and d_w and "error" not in o_w and "error" not in d_w:
-                            o_w["city"] = ev["origin_city"]
-                            d_w["city"] = ev["destination_city"]
-                            advice = get_event_clothing(o_w, d_w, ev["event_type"])
-                        result = send_event_reminder_sms(settings["phone_number"], ev, o_w, d_w, advice)
-                        st.success(f"Reminder SMS {result['status']}!")
-
-                with col3:
-                    if st.button("Delete", key=f"del_{ev['id']}", type="secondary"):
-                        delete_event(ev["id"])
-                        st.rerun()
-    else:
-        st.info("No upcoming events. Add a schedule plan above.")
+            event_desc = f"{event_type}: {origin} → {destination}"
+            add_event(
+                event_type, event_desc, origin, destination,
+                event_date.strftime("%Y-%m-%d"),
+                event_time.strftime("%H:%M"),
+                24,
+            )
+            st.success(f"Event added: {event_desc}")
 
 
 # ===== TAB 5: SMS & Notification Log =====
