@@ -203,12 +203,13 @@ button[kind="primary"], button[kind="secondary"], .stButton button {
 .weather-hero-card {
     background: linear-gradient(135deg, #1a237e 0%, #283593 40%, #1565c0 100%);
     border-radius: 20px;
-    padding: 35px;
+    padding: 35px 35px 30px 35px;
     color: white;
     position: relative;
     overflow: hidden;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
+.weather-hero-card p { margin-bottom: 0; }
 .weather-hero-card::after {
     content: '';
     position: absolute;
@@ -223,15 +224,15 @@ button[kind="primary"], button[kind="secondary"], .stButton button {
     font-size: 4.2rem;
     font-weight: 800;
     letter-spacing: -2px;
-    line-height: 1.1;
-    margin: 12px 0 8px 0;
+    line-height: 1.2;
+    margin: 16px 0 12px 0;
 }
 .weather-desc {
     font-size: 1.3rem;
     font-weight: 400;
     opacity: 0.85;
     text-transform: capitalize;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 .weather-detail {
     display: inline-block;
@@ -246,7 +247,7 @@ button[kind="primary"], button[kind="secondary"], .stButton button {
     font-size: 1.6rem;
     font-weight: 600;
     letter-spacing: -0.5px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 /* ---- Forecast Day Card ---- */
@@ -260,11 +261,11 @@ button[kind="primary"], button[kind="secondary"], .stButton button {
     transition: transform 0.2s;
 }
 .forecast-day:hover { transform: translateY(-3px); }
-.forecast-day-name { font-size: 0.85rem; font-weight: 600; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4; }
-.forecast-emoji { font-size: 2.2rem; margin: 8px 0; }
-.forecast-temp-high { font-size: 1.5rem; font-weight: 700; line-height: 1.3; }
-.forecast-temp-low { font-size: 0.95rem; opacity: 0.6; line-height: 1.3; }
-.forecast-rain { font-size: 0.8rem; opacity: 0.5; margin-top: 4px; }
+.forecast-day-name { font-size: 0.85rem; font-weight: 600; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.5; margin-bottom: 4px; }
+.forecast-emoji { font-size: 2.2rem; margin: 10px 0; }
+.forecast-temp-high { font-size: 1.5rem; font-weight: 700; line-height: 1.4; margin-bottom: 2px; }
+.forecast-temp-low { font-size: 0.95rem; opacity: 0.6; line-height: 1.4; }
+.forecast-rain { font-size: 0.8rem; opacity: 0.5; margin-top: 6px; }
 
 /* ---- Outfit Card ---- */
 .outfit-hero {
@@ -422,9 +423,9 @@ button[kind="primary"], button[kind="secondary"], .stButton button {
     padding: 16px 12px;
     text-align: center;
 }
-.mini-metric-icon { font-size: 1.5rem; margin-bottom: 6px; }
-.mini-metric-value { font-size: 1.5rem; font-weight: 700; color: white; line-height: 1.3; }
-.mini-metric-label { font-size: 0.78rem; color: rgba(255,255,255,0.4); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+.mini-metric-icon { font-size: 1.5rem; margin-bottom: 8px; }
+.mini-metric-value { font-size: 1.5rem; font-weight: 700; color: white; line-height: 1.3; margin-bottom: 4px; }
+.mini-metric-label { font-size: 0.78rem; color: rgba(255,255,255,0.4); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; }
 
 /* ---- Sidebar ---- */
 section[data-testid="stSidebar"] {
@@ -612,8 +613,8 @@ with tab1:
                 <p class="weather-city-name">{forecast_city}</p>
                 <p class="weather-desc">{emoji} {current['description'].title()}</p>
                 <p class="weather-temp-big" style="color:{temp_color}">{current['temperature']}&#176;C</p>
-                <p style="font-size:0.95rem;opacity:0.6;margin-top:2px">Feels like {current['feels_like']}&#176;C</p>
-                <div style="margin-top:16px">
+                <p style="font-size:0.95rem;opacity:0.6;margin-top:6px">Feels like {current['feels_like']}&#176;C</p>
+                <div style="margin-top:20px">
                     <span class="weather-detail">&#128167; {current['humidity']}%</span>
                     <span class="weather-detail">&#127744; {current['wind_speed']} m/s</span>
                     <span class="weather-detail">&#9729;&#65039; {current['clouds']}%</span>
