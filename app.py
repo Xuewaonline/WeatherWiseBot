@@ -220,17 +220,18 @@ button[kind="primary"], button[kind="secondary"], .stButton button {
     border-radius: 50%;
 }
 .weather-temp-big {
-    font-size: 5rem;
+    font-size: 4.2rem;
     font-weight: 800;
-    letter-spacing: -3px;
-    line-height: 1;
-    margin: 10px 0;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin: 12px 0 8px 0;
 }
 .weather-desc {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     font-weight: 400;
     opacity: 0.85;
     text-transform: capitalize;
+    margin-bottom: 4px;
 }
 .weather-detail {
     display: inline-block;
@@ -242,10 +243,10 @@ button[kind="primary"], button[kind="secondary"], .stButton button {
     font-weight: 500;
 }
 .weather-city-name {
-    font-size: 1.7rem;
+    font-size: 1.6rem;
     font-weight: 600;
     letter-spacing: -0.5px;
-    margin-bottom: 0;
+    margin-bottom: 4px;
 }
 
 /* ---- Forecast Day Card ---- */
@@ -253,17 +254,17 @@ button[kind="primary"], button[kind="secondary"], .stButton button {
     background: linear-gradient(180deg, rgba(30,60,114,0.6) 0%, rgba(42,82,152,0.4) 100%);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 16px;
-    padding: 20px 16px;
+    padding: 20px 14px;
     text-align: center;
     color: white;
     transition: transform 0.2s;
 }
 .forecast-day:hover { transform: translateY(-3px); }
-.forecast-day-name { font-size: 0.9rem; font-weight: 600; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
-.forecast-emoji { font-size: 2.4rem; margin: 8px 0; }
-.forecast-temp-high { font-size: 1.6rem; font-weight: 700; }
-.forecast-temp-low { font-size: 1rem; opacity: 0.6; }
-.forecast-rain { font-size: 0.85rem; opacity: 0.5; margin-top: 4px; }
+.forecast-day-name { font-size: 0.85rem; font-weight: 600; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4; }
+.forecast-emoji { font-size: 2.2rem; margin: 8px 0; }
+.forecast-temp-high { font-size: 1.5rem; font-weight: 700; line-height: 1.3; }
+.forecast-temp-low { font-size: 0.95rem; opacity: 0.6; line-height: 1.3; }
+.forecast-rain { font-size: 0.8rem; opacity: 0.5; margin-top: 4px; }
 
 /* ---- Outfit Card ---- */
 .outfit-hero {
@@ -418,12 +419,12 @@ button[kind="primary"], button[kind="secondary"], .stButton button {
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
-    padding: 18px;
+    padding: 16px 12px;
     text-align: center;
 }
-.mini-metric-icon { font-size: 1.7rem; margin-bottom: 6px; }
-.mini-metric-value { font-size: 1.8rem; font-weight: 700; color: white; }
-.mini-metric-label { font-size: 0.82rem; color: rgba(255,255,255,0.4); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.mini-metric-icon { font-size: 1.5rem; margin-bottom: 6px; }
+.mini-metric-value { font-size: 1.5rem; font-weight: 700; color: white; line-height: 1.3; }
+.mini-metric-label { font-size: 0.78rem; color: rgba(255,255,255,0.4); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
 
 /* ---- Sidebar ---- */
 section[data-testid="stSidebar"] {
@@ -611,7 +612,7 @@ with tab1:
                 <p class="weather-city-name">{forecast_city}</p>
                 <p class="weather-desc">{emoji} {current['description'].title()}</p>
                 <p class="weather-temp-big" style="color:{temp_color}">{current['temperature']}&#176;C</p>
-                <p style="font-size:0.9rem;opacity:0.6;margin-top:-5px">Feels like {current['feels_like']}&#176;C</p>
+                <p style="font-size:0.95rem;opacity:0.6;margin-top:2px">Feels like {current['feels_like']}&#176;C</p>
                 <div style="margin-top:16px">
                     <span class="weather-detail">&#128167; {current['humidity']}%</span>
                     <span class="weather-detail">&#127744; {current['wind_speed']} m/s</span>
