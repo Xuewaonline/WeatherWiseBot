@@ -613,11 +613,11 @@ with tab1:
                 <p class="weather-city-name">{forecast_city}</p>
                 <p class="weather-desc">{emoji} {current['description'].title()}</p>
                 <p class="weather-temp-big" style="color:{temp_color}">{current['temperature']:.1f}&#176;C</p>
-                <p style="font-size:0.95rem;opacity:0.6;margin-top:6px">Feels like {current['feels_like']}&#176;C</p>
+                <p style="font-size:0.95rem;opacity:0.6;margin-top:6px">Feels like {current['feels_like']:.1f}&#176;C</p>
                 <div style="margin-top:20px">
-                    <span class="weather-detail">&#128167; {current['humidity']}%</span>
-                    <span class="weather-detail">&#127744; {current['wind_speed']} m/s</span>
-                    <span class="weather-detail">&#9729;&#65039; {current['clouds']}%</span>
+                    <span class="weather-detail">&#128167; {current['humidity']:.1f}%</span>
+                    <span class="weather-detail">&#127744; {current['wind_speed']:.1f} m/s</span>
+                    <span class="weather-detail">&#9729;&#65039; {current['clouds']:.1f}%</span>
                     <span class="weather-detail">&#128065; {current['visibility']/1000:.1f} km</span>
                 </div>
             </div>
@@ -626,9 +626,9 @@ with tab1:
             # Metrics
             col1, col2, col3, col4 = st.columns(4)
             for col, icon, val, label in [
-                (col1, "&#127777;&#65039;", f"{current['temperature']}&#176;C", "Temperature"),
-                (col2, "&#128167;", f"{current['humidity']}%", "Humidity"),
-                (col3, "&#127744;", f"{current['wind_speed']} m/s", "Wind"),
+                (col1, "&#127777;&#65039;", f"{current['temperature']:.1f}&#176;C", "Temperature"),
+                (col2, "&#128167;", f"{current['humidity']:.1f}%", "Humidity"),
+                (col3, "&#127744;", f"{current['wind_speed']:.1f} m/s", "Wind"),
                 (col4, "&#128065;", f"{current['visibility']/1000:.1f} km", "Visibility"),
             ]:
                 col.markdown(f"""
@@ -660,9 +660,9 @@ with tab1:
                         <div class="forecast-day">
                             <div class="forecast-day-name">{day_name}<br/>{d[5:]}</div>
                             <div class="forecast-emoji">{day_emoji}</div>
-                            <div class="forecast-temp-high">{max(temps):.0f}&#176;</div>
-                            <div class="forecast-temp-low">{min(temps):.0f}&#176;</div>
-                            <div class="forecast-rain">&#9730; {max(rain_chances):.0f}%</div>
+                            <div class="forecast-temp-high">{max(temps):.1f}&#176;</div>
+                            <div class="forecast-temp-low">{min(temps):.1f}&#176;</div>
+                            <div class="forecast-rain">&#9730; {max(rain_chances):.1f}%</div>
                         </div>
                         """, unsafe_allow_html=True)
 
@@ -689,11 +689,11 @@ with tab1:
                 <div class="compare-card">
                     <p style="font-size:1.2rem;font-weight:600;margin:0">{name}</p>
                     <p style="font-size:2rem;margin:0">{e}</p>
-                    <p style="font-size:2.5rem;font-weight:800;color:{tc};margin:5px 0">{w['temperature']}&#176;C</p>
+                    <p style="font-size:2.5rem;font-weight:800;color:{tc};margin:5px 0">{w['temperature']:.1f}&#176;C</p>
                     <p style="font-size:0.9rem;opacity:0.7;margin:0">{w['description'].title()}</p>
                     <div style="margin-top:10px">
-                        <span class="weather-detail">&#128167; {w['humidity']}%</span>
-                        <span class="weather-detail">&#127744; {w['wind_speed']} m/s</span>
+                        <span class="weather-detail">&#128167; {w['humidity']:.1f}%</span>
+                        <span class="weather-detail">&#127744; {w['wind_speed']:.1f} m/s</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -726,8 +726,8 @@ with tab2:
                         <p style="margin:0;opacity:0.6">{summary['description'].title()}</p>
                     </div>
                     <div style="margin-left:auto;text-align:right">
-                        <p style="margin:0;font-size:2rem;font-weight:800">{summary['current_temp']}&#176;C</p>
-                        <p style="margin:0;font-size:0.8rem;opacity:0.5">Rain {summary['rain_chance']}% | Wind {summary['wind_speed']} m/s</p>
+                        <p style="margin:0;font-size:2rem;font-weight:800">{summary['current_temp']:.1f}&#176;C</p>
+                        <p style="margin:0;font-size:0.8rem;opacity:0.5">Rain {summary['rain_chance']:.1f}% | Wind {summary['wind_speed']:.1f} m/s</p>
                     </div>
                 </div>
             </div>
