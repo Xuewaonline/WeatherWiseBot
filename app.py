@@ -748,9 +748,13 @@ with tab2:
             st.markdown("##### SMS Preview")
             sms_text = (
                 f"WeatherWiseBot - {outfit_city}\n"
-                f"Temp: {summary['current_temp']}C, {summary['description'].title()}\n"
-                f"Rain: {summary['rain_chance']}%\n\n"
-                f"Outfit: {rec['suggestion']}"
+                f"Weather: {summary['description'].title()}\n"
+                f"Temp: {summary['current_temp']:.1f}°C\n"
+                f"Rain: {summary['rain_chance']:.1f}%\n"
+                f"Wind: {summary['wind_speed']:.1f} m/s\n\n"
+                f"Clothing: {', '.join(rec['layers'])}\n"
+                f"Footwear: {rec['footwear']}"
+                + (f"\nAccessories: {', '.join(rec['accessories'])}" if rec['accessories'] else "")
             )
             st.markdown(f"""
             <div class="sms-phone">
