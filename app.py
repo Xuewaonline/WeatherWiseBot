@@ -481,7 +481,7 @@ with st.sidebar:
     st.markdown("")
     st.markdown("""
     <div style="text-align:center;margin-bottom:20px">
-        <div style="font-size:2.8rem;font-weight:800;color:#64b5f6;margin-bottom:2px;animation: mascotBounce 2s ease-in-out infinite">W</div>
+        <div style="font-size:3.5rem;margin-bottom:2px;animation: mascotBounce 2s ease-in-out infinite">&#9925;</div>
         <div style="font-size:1.2rem;font-weight:800;color:#64b5f6;letter-spacing:-0.5px">WeatherWiseBot</div>
         <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:2px">Your Smart Weather Buddy</div>
     </div>
@@ -543,7 +543,7 @@ st.markdown("""
 <div class="hero-container">
     <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
         <div class="hero-mascot">
-            <div class="mascot-cloud" style="font-size:3.2rem;font-weight:800;color:#64b5f6;letter-spacing:-1px;filter:none">W</div>
+            <div class="mascot-cloud">&#9925;</div>
         </div>
         <div>
             <p class="hero-title">WeatherWiseBot</p>
