@@ -223,9 +223,9 @@ button[kind="primary"], button[kind="secondary"], .stButton button {
 .weather-temp-big {
     font-size: 4.2rem;
     font-weight: 800;
-    letter-spacing: -2px;
-    line-height: 1.2;
-    margin: 16px 0 12px 0;
+    letter-spacing: 2px;
+    line-height: 1.3;
+    margin: 20px 0 16px 0;
 }
 .weather-desc {
     font-size: 1.3rem;
